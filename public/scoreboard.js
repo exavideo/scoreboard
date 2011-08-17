@@ -1,18 +1,23 @@
 function initializeTeam() {
-    teamState = new Object( );
+    var teamState = new Object( );
     
     teamState.penalties = new Array( );
     teamState.name = "RPI";
     teamState.color = "#D40000";
     teamState.score = 0;
     teamState.shotsOnGoal = 0;
+    teamState.autocompletePlayers = []
 
     return teamState;
 }
 
+autocompletePenalties = [];
+
 teamStates = new Array( );
 teamStates[0] = initializeTeam( );
 teamStates[1] = initializeTeam( );
+
+teamControlPanels = new Array( )
 
 function getJson(sourceurl, callback) {
     jQuery.ajax({
@@ -126,7 +131,13 @@ function setupTeam(team) {
 }
 
 function announceGoal(teamId) {
-    var team = teamStates[teamId]
+    var team = teamStates[teamId];
+
+    // autocomplete player names
+    $("#announce_goal_form").find("input").autocomplete({
+        source: team.autocompletePlayers
+    });
+
     $("#announce_goal_form").ok_cancel_dialog(
         team.name + " Goal",
         function() {
@@ -137,11 +148,13 @@ function announceGoal(teamId) {
                 if (val != "") {
                     return "A: " + val;
                 }
-            });
+            }).get( );
 
             // build announcement
             announce_data = [team.name + " GOAL", scorer].concat(assisters);
             postJson("/announce", announce_data);
+
+            $(this).dialog("close");
         }
     );
 }
@@ -166,7 +179,23 @@ function editScore(team) {
     );
 }
 
-function announcePenalty(team) {
+function announcePenalty(teamId) {
+    var team = teamStates[teamId];
+    // autocomplete player names
+    $("#announce_penalty_form").find("#player").autocomplete({
+        source: team.autocompletePlayers
+    });
+
+    $("#announce_penalty_form").find("#penalty").autocomplete({
+        source: autocompletePenalties
+    });
+
+    $("#announce_penalty_form").ok_cancel_dialog(
+        team.name + " Penalty",
+        function() {
+
+        }
+    );
     
 }
 
@@ -191,7 +220,7 @@ function generalStatus(dummy) {
 }
 
 jQuery.fn.buildTeamPanel = function(teamId) {
-    teamStates[teamId].controlPanel = this
+    teamControlPanels[teamId] = this;
     return this
         .appendButton("Team Setup", setupTeam, teamId)
         .appendButton("Announce Goal", announceGoal, teamId)
@@ -210,8 +239,8 @@ jQuery.fn.buildGlobalPanel = function() {
 }
 
 function updateTeamStateDisplay(teamId) {
-    teamState = teamStates[teamId];
-    teamPanel = teamState.controlPanel;
+    var teamState = teamStates[teamId];
+    var teamPanel = teamControlPanels[teamId];
 
     teamPanel.find("#name").text(teamState.name);
     teamPanel.find("#score").text(teamState.score);
@@ -231,6 +260,7 @@ function updateTeamState(teamId) {
 
 function fetchTeamState(teamId) {
     getJson("/team/" + teamId, function(data) {
+        alert(teamId);
         teamStates[teamId] = data;
         updateTeamStateDisplay(teamId);
     });

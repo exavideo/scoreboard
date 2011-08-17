@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script src="js/jquery-1.6.2.js"></script>
+        <script src="js/jquery-1.6.2.min.js"></script>
         <script src="js/jquery-ui-1.8.15.custom.min.js"></script>
         <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.15.custom.css" />
 
@@ -28,21 +28,45 @@
         <div style="clear:left"></div>
         <div id="footer"><img src="ExavideoLogo60h.png"></div>
 
-        <form id="edit_form" class="dialog">
-            <input type="text" id="field" name="field" />
-        </form>
+        <div id="edit_form" class="dialog">
+            <form>
+                <input type="text" id="field" name="field" />
+            </form>
+        </div>
 
-        <form id="announce_goal_form" class="dialog">
-            <p>Scored by: <input type="text" id="scorer" /></p>
-            <p>Assisted: <input type="text" id="assist" /></p>
-            <p>Assisted: <input type="text" id="assist" /></p>
-            <p>Assisted: <input type="text" id="assist" /></p>
-        </form>
+        <div id="announce_goal_form" class="dialog">
+            <form> 
+                <p>
+                    <label for="scorer">Scored by</label> 
+                    <input type="text" name="scorer" id="scorer" />
+                </p>
+                <p>
+                    <label for="assist">Assisted by</label>
+                    <input type="text" id="assist" name="assist" />
+                </p>
+                <p>
+                    <label for="assist">Assisted by</label>
+                    <input type="text" id="assist" name="assist" />
+                </p>
+                <p>
+                    <label for="assist">Assisted by</label>
+                    <input type="text" id="assist" name="assist" />
+                </p>
+            </form>
+        </div>
 
-        <form id="announce_penalty_form" class="dialog">
-            <p>Player: <input type="text" id="player" /></p>
-            <p>Penalty: <input type="text" id="penalty" /></p>
-        </form>
+        <div id="announce_penalty_form" class="dialog">
+            <form id="announce_penalty_form" class="dialog">
+                <p>
+                    <label for="player">Player</label>
+                    <input type="text" name="player" id="player" />
+                </p>
+                <p>
+                    <label for="penalty">Penalty</label>
+                    <input type="text" name="penalty" id="penalty" />
+                </p>
+            </form>
+        </div>
 
         <div id="penalty_queue_form" class="dialog">
             <div id="penalties"></div>
