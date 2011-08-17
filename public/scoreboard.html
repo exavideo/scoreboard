@@ -1,0 +1,53 @@
+<html>
+    <head>
+        <script src="js/jquery-1.6.2.js"></script>
+        <script src="js/jquery-ui-1.8.15.custom.min.js"></script>
+        <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.15.custom.css" />
+
+        <script src="scoreboard.js"></script>
+    </head>
+        
+    <body>
+        <!-- global state/control -->
+        <div id="global"></div>
+        <!-- team-specific controls -->
+        <div style="float:left" id="home_control">
+            <h1 id="name"></h1>
+            <p>Score</p>
+            <h1 id="score"></h1>
+            <p>Shots on Goal</p>
+            <h2 id="shots"></h1>
+        </div>
+        <div style="float:left" id="away_control">
+            <h1 id="name"></h1>
+            <p>Score</p>
+            <h1 id="score"></h1>
+            <p>Shots on Goal</p>
+            <h2 id="shots"></h1>
+        </div>
+        <div style="clear:left"></div>
+        <div id="footer"><img src="ExavideoLogo60h.png"></div>
+
+        <form id="edit_form" class="dialog">
+            <input type="text" id="field" name="field" />
+        </form>
+
+        <form id="announce_goal_form" class="dialog">
+            <p>Scored by: <input type="text" id="scorer" /></p>
+            <p>Assisted: <input type="text" id="assist" /></p>
+            <p>Assisted: <input type="text" id="assist" /></p>
+            <p>Assisted: <input type="text" id="assist" /></p>
+        </form>
+
+        <form id="announce_penalty_form" class="dialog">
+            <p>Player: <input type="text" id="player" /></p>
+            <p>Penalty: <input type="text" id="penalty" /></p>
+        </form>
+
+        <div id="penalty_queue_form" class="dialog">
+            <div id="penalties"></div>
+            <div><input type="button" value="Add Penalty"></div>
+        </div>
+    </body>
+
+</html>
