@@ -1,30 +1,42 @@
 function initializeTeam() {
     var teamState = new Object( );
     
-    teamState.penalties = new Array( );
+    teamState.penalties = new Object( );
+    teamState.penalties.activeQueueStarts = [ 0, 0 ];
+    teamState.penalties.activeQueues = [ new Array(), new Array() ];
+    teamState.penalties.announcedQueue = new Array();
     teamState.name = "RPI";
     teamState.color = "#D40000";
     teamState.score = 0;
     teamState.shotsOnGoal = 0;
     teamState.autocompletePlayers = []
+    teamState.timeoutsLeft = 3;
+    teamState.timeoutNowInUse = false;
 
     return teamState;
 }
 
-autocompletePenalties = [];
+autocompletePenalties = ["SUCKING"];
 
 teamStates = new Array( );
 teamStates[0] = initializeTeam( );
 teamStates[1] = initializeTeam( );
 
-teamControlPanels = new Array( )
+teamControlPanels = new Array( );
+penaltyQueues = new Array( );
+penaltyQueues[0] = new Array( );
+penaltyQueues[1] = new Array( );
+
+clockState = new Object( )
+
+lastStopTimeElapsed = 0;
 
 function getJson(sourceurl, callback) {
     jQuery.ajax({
         url: sourceurl,
         dataType: "json",
         error: function(jqxhr, textStatus) {
-            alert("Communication failure: " + textStatus);
+            //alert("Communication failure: " + textStatus);
         },
         success: function(data) {
             callback(data);
@@ -39,7 +51,7 @@ function putJson(desturl, obj) {
         contentType: "application/json",
         data: JSON.stringify(obj),
         error: function(jqxhr, textStatus) {
-            alert("Communication error: " + textStatus);  
+            //alert("Communication error: " + textStatus);  
         }
     });
 }
@@ -51,20 +63,27 @@ function postJson(desturl, obj) {
         contentType: "application/json",
         data: JSON.stringify(obj),
         error: function(jqxhr, textStatus) {
-            alert("Communication error: " + textStatus);  
+            //alert("Communication error: " + textStatus);  
         }
     });
 }
 
 jQuery.fn.appendButton = function(name, onClick, arg) {
-    var button = $('<input type="button" />');
+    var button = $('<button />');
     var div = $('<div/>');
 
     button.click(function() { onClick(arg) });
-    button.val(name)
+    button.text(name)
     div.append(button);
 
     return this.append(div);
+}
+
+jQuery.fn.buttonAfter = function(name, onClick) {
+    var button = $('<button />');
+    button.click(onClick);
+    button.text(name);
+    return this.after(button);
 }
 
 jQuery.fn.appendH1 = function(initialValue, id) {
@@ -181,42 +200,180 @@ function editScore(team) {
 
 function announcePenalty(teamId) {
     var team = teamStates[teamId];
-    // autocomplete player names
-    $("#announce_penalty_form").find("#player").autocomplete({
-        source: team.autocompletePlayers
-    });
+    
+    // clear form
+    $("#announce_penalty_form").find("input").val("");
 
+    // set up autocompletion
     $("#announce_penalty_form").find("#penalty").autocomplete({
         source: autocompletePenalties
     });
 
-    $("#announce_penalty_form").ok_cancel_dialog(
-        team.name + " Penalty",
-        function() {
+    $("#announce_penalty_form").find("#player").autocomplete({
+        source: team.autocompletePlayers
+    });
 
+    // show dialog
+    $("#announce_penalty_form").ok_cancel_dialog(
+        "Announce " + team.name + " Penalty", 
+        function() {
+            // make penalty object from form
+            var penaltyObj = new Object();
+            penaltyObj.player = $("#announce_penalty_form").find("#player").val();
+            penaltyObj.penalty = $("#announce_penalty_form").find("#penalty").val();
+            penaltyObj.time = $("#announce_penalty_form").find("#penaltyType").val();
+
+            // add to team's "announced" queue
+            team.penalties.announcedQueue.push(penaltyObj)
+
+            // send back to server
+            updateTeamState(teamId);
+
+            $(this).dialog("close");
         }
     );
     
 }
 
-function viewPenaltyQueues(team) {
+function populatePenaltyQueue(where, penalties) {
+    $.each(penalties, function(i,p) {
+        var entry = $('<li />');
+        entry.addClass("penaltyEntry");
+        entry.data("penaltyObj", p);
+        entry.text(p.player + ' - ' + p.penalty
+                + ' [' + p.time + ':00]');
+        entry.appendButton(
+            "Remove", 
+            function() {
+                entry.detach();    
+            },
+            null
+        );
+        where.append(entry);
+    });
+}
 
+function extractPenaltyData(fromWhere) {
+    return fromWhere.find("li")
+        .map(function(i, x) { return $(x).data("penaltyObj") })
+        .get();
+}
+
+function savePenaltyQueues(team) {
+    team.penalties.activeQueues[0] = extractPenaltyData($("#pq1"));
+    team.penalties.activeQueues[1] = extractPenaltyData($("#pq2"));
+    team.penalties.announcedQueue = extractPenaltyData($("#pqa"));
+}
+
+function viewPenaltyQueues(team) {
+    var team = teamStates[team];
+
+    // empty the dialog
+    $("#penalty_queue_dialog").find(".penaltyEntry").remove( );
+
+    // populate penalty queues
+    populatePenaltyQueue($("#penalty_queue_dialog").find("#pq1"), 
+            team.penalties.activeQueues[0]);
+    populatePenaltyQueue($("#penalty_queue_dialog").find("#pq2"),
+            team.penalties.activeQueues[1]);
+    populatePenaltyQueue($("#penalty_queue_dialog").find("#pqa"),
+            team.penalties.announcedQueue);
+
+    $("#penalty_queue_dialog").find("#clearAllPenalties").click(function() {
+        $("#penalty_queue_dialog").find(".penaltyEntry").remove( );
+    });
+    
+
+    // ready to go (in theory...)
+    $("#penalty_queue_dialog").dialog("option", "width", "800");
+    $("#penalty_queue_dialog").dialog("option", "height", "600");
+    $("#penalty_queue_dialog").ok_cancel_dialog(
+        "Edit " + team.name + " Penalty Queue",
+        function() { 
+            savePenaltyQueues(team);
+            $(this).dialog("close"); 
+        }
+    );
+
+}
+
+function useTimeout(teamId) {
+    var team = teamStates[teamId];
+    
+    if (team.timeoutsLeft > 0) {
+        stopClock(0);
+        team.timeoutsLeft = team.timeoutsLeft - 1;
+        team.timeoutNowInUse = true;
+        updateTeamState(teamId);
+    }
 }
 
 function startClock(dummy) {
+    // save the time for penalties
+    lastStopTimeElapsed = clockState.time_elapsed;
 
+    // clear out any ongoing timeouts 
+    teamStates[0].timeoutNowInUse = false;
+    teamStates[1].timeoutNowInUse = false;
+    updateTeamState(0);
+    updateTeamState(1);
+
+    putJson('/clock/running', { 'run' : true }); 
 }
 
 function stopClock(dummy) {
+    putJson('/clock/running', { 'run' : false });
+}
 
+function formatTime(tenthsClock) {
+    var tenths = tenthsClock % 10;
+    var seconds = Math.floor(tenthsClock / 10);
+    var minutes = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+
+    var result = minutes + ":";
+    if (seconds < 10) {
+        result += "0";
+    } 
+    result += seconds;
+    result += "." + tenths;
+    return result;
+}
+
+function updateClock( ) {
+    getJson('/clock', function(data) {
+        clockState = data;
+
+        var tenthsRemaining = data.period_remaining;
+        var period = data.period;
+        var isRunning = data.running;
+
+        var clockField = $("#global").find("#clock");
+
+        if (isRunning) {
+            clockField.addClass("clock_running");
+            clockField.removeClass("clock_stopped");
+        } else {
+            clockField.addClass("clock_stopped");
+            clockField.removeClass("clock_running");
+        }
+
+        clockField.text(formatTime(tenthsRemaining) + " " + period);
+    });
 }
 
 function generalAnnounce(dummy) {
-
+    editText("General Announcement", function(text) {
+        postJson("/announce", { message : text });
+        $(this).dialog("close");
+    });
 }
 
 function generalStatus(dummy) {
-
+    editText("General Status Message", function(text) {
+        putJson("/status", { message : text });
+        $(this).dialog("close");
+    });
 }
 
 jQuery.fn.buildTeamPanel = function(teamId) {
@@ -224,6 +381,7 @@ jQuery.fn.buildTeamPanel = function(teamId) {
     return this
         .appendButton("Team Setup", setupTeam, teamId)
         .appendButton("Announce Goal", announceGoal, teamId)
+        .appendButton("Use Timeout", useTimeout, teamId)
         .appendButton("Edit Score", editScore, teamId)
         .appendButton("Shots on Goal", editShots, teamId)
         .appendButton("Announce Penalty", announcePenalty, teamId)
@@ -245,6 +403,7 @@ function updateTeamStateDisplay(teamId) {
     teamPanel.find("#name").text(teamState.name);
     teamPanel.find("#score").text(teamState.score);
     teamPanel.find("#shots").text(teamState.shotsOnGoal);
+    teamPanel.find("#timeouts").text(teamState.timeoutsLeft);
 }
 
 function updateTeamStateAjax(teamId) {
@@ -260,9 +419,21 @@ function updateTeamState(teamId) {
 
 function fetchTeamState(teamId) {
     getJson("/team/" + teamId, function(data) {
-        alert(teamId);
         teamStates[teamId] = data;
         updateTeamStateDisplay(teamId);
+    });
+}
+
+function updateClockTimeout( ) {
+    updateClock( );
+    setTimeout(updateClockTimeout, 100);
+}
+
+function addPenaltyTimeButtons(where) {
+    where.buttonAfter("Last Clock Start", function() {
+        where.val(lastStopTimeElapsed); 
+    }).buttonAfter("Time Now", function() { 
+        where.val(clockState.time_elapsed);
     });
 }
 
@@ -273,11 +444,17 @@ $(document).ready(function() {
 
     fetchTeamState(0);
     fetchTeamState(1);
+    updateClockTimeout( );
 
     $(".dialog").dialog({
         autoOpen: false,
-        modal: true,
+        //modal: true,
         resizable: false,
     });
+
+    $(".penalty_list").sortable({ connectWith: ".penalty_list" });
+
+    addPenaltyTimeButtons($("#pq1start"));
+    addPenaltyTimeButtons($("#pq2start"));
 
 });

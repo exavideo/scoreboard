@@ -4,26 +4,50 @@
         <script src="js/jquery-ui-1.8.15.custom.min.js"></script>
         <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.15.custom.css" />
 
+        <style type="text/css">
+            .penalty_queue { float: left; width: 200px; }
+
+            #penalty_queue_dialog input {
+                width: 80px;
+            }
+
+            .penalty_list { 
+                padding: 10px; margin: 5px; 
+                background-color: #aaa; 
+                list-style-type: none;
+            }
+
+            .penalty_list li {
+                margin: 5px; padding: 5px; 
+                background-color: #888;
+                color: white;
+            }
+        </style>
+
         <script src="scoreboard.js"></script>
     </head>
         
     <body>
         <!-- global state/control -->
-        <div id="global"></div>
+        <div id="global"><h1 id="clock"></h1></div>
         <!-- team-specific controls -->
         <div style="float:left" id="home_control">
             <h1 id="name"></h1>
             <p>Score</p>
             <h1 id="score"></h1>
             <p>Shots on Goal</p>
-            <h2 id="shots"></h1>
+            <h2 id="shots"></h2>
+            <p>Timeouts Left</p>
+            <h2 id="timeouts"></h2>
         </div>
         <div style="float:left" id="away_control">
             <h1 id="name"></h1>
             <p>Score</p>
             <h1 id="score"></h1>
             <p>Shots on Goal</p>
-            <h2 id="shots"></h1>
+            <h2 id="shots"></h2>
+            <p>Timeouts Left</p>
+            <h2 id="timeouts"></h2>
         </div>
         <div style="clear:left"></div>
         <div id="footer"><img src="ExavideoLogo60h.png"></div>
@@ -56,7 +80,7 @@
         </div>
 
         <div id="announce_penalty_form" class="dialog">
-            <form id="announce_penalty_form" class="dialog">
+            <form>
                 <p>
                     <label for="player">Player</label>
                     <input type="text" name="player" id="player" />
@@ -65,12 +89,35 @@
                     <label for="penalty">Penalty</label>
                     <input type="text" name="penalty" id="penalty" />
                 </p>
+                <p>
+                    <label for="penaltyType">Penalty Type</label>
+                    <select id="penaltyType" name="penaltyType">
+                        <option value="2">Minor (2:00)</option>
+                        <option value="4">Double Minor (4:00)</option>
+                        <option value="5">Major (5:00)</option>
+                        <option value="10">Misconduct (10:00)</option>
+                    </select>
             </form>
         </div>
 
-        <div id="penalty_queue_form" class="dialog">
-            <div id="penalties"></div>
-            <div><input type="button" value="Add Penalty"></div>
+        <div id="penalty_queue_dialog" class="dialog" style="width: 800px">
+                <div class="penalty_queue"> 
+                    <label for="pq1start">Start Time</label>
+                    <input type="text" name="pq1start" id="pq1start" />
+                    <ul id="pq1" class="penalty_list"></ul>
+                </div>
+                <div class="penalty_queue">
+                    <label for="pq2start">Start Time</label>
+                    <input type="text" name="pq2start" id="pq2start" />
+                    <ul id="pq2" class="penalty_list"></ul>
+                </div>
+                <div class="penalty_queue">
+                    Announced Only
+                    <ul id="pqa" class="penalty_list"></ul>
+                </div>
+                <div style="clear: both"></div>
+                <div><button id="clearAllPenalties">Remove All</button></div>
+            </div>
         </div>
     </body>
 
