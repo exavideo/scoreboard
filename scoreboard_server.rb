@@ -398,6 +398,8 @@ class ScoreboardApp < Patchbay
     def render_view
         @view.render
     end
+
+    self.files_dir = 'public_html'
 end
 
 def ScoreboardView
@@ -419,3 +421,7 @@ def ScoreboardView
 
     attr_accessor :announce, :status, :home_team, :away_team
 end
+
+app = ScoreboardApp.new
+app.run(:Host => '::', :Port => 3000)
+
