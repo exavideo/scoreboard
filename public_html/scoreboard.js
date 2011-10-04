@@ -429,6 +429,11 @@ function updateClockTimeout( ) {
     setTimeout(updateClockTimeout, 100);
 }
 
+function updatePreviewTimeout( ) {
+    $("#preview img").removeAttr("src").attr("src", "/preview?" + new Date().getTime());
+    setTimeout(updatePreviewTimeout, 1000);
+}
+
 function addPenaltyTimeButtons(where) {
     where.buttonAfter("Last Clock Start", function() {
         where.val(lastStopTimeElapsed); 
@@ -445,6 +450,7 @@ $(document).ready(function() {
     fetchTeamState(0);
     fetchTeamState(1);
     updateClockTimeout( );
+    updatePreviewTimeout( );
 
     $(".dialog").dialog({
         autoOpen: false,

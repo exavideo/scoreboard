@@ -102,8 +102,7 @@ class TeamHelper
     end
 
     def penalties
-        @penalty_helper ||= PenaltyHelper.new(team_data['penalties'], @clock)
-        @penalty_helper
+        PenaltyHelper.new(team_data['penalties'], @clock)
     end
 
     def strength
@@ -198,6 +197,14 @@ class AnnounceHelper
             nil
         end
     end
+
+    def message
+        if @announce.length > 0
+            @announce[0]
+        else
+            ''
+        end
+    end
 end
 
 class StatusHelper
@@ -230,6 +237,38 @@ class StatusHelper
 
     def is_up
         @app.status != '' 
+    end
+end
+
+class ClockHelper
+    def initialize(clock)
+        @clock = clock
+    end
+
+    def time
+        tenths = @clock.period_remaining
+
+        seconds = tenths / 10
+        tenths = tenths % 10
+
+        minutes = seconds / 60
+        seconds = seconds % 60
+
+        if minutes > 0
+            format '%d:%02d', minutes, seconds
+        else
+            format ':%02d.%d', seconds, tenths
+        end
+    end
+
+    def period
+        if @clock.period <= 3
+            @clock.period.to_s
+        elsif @clock.period == 4
+            'OT'
+        else
+            (@clock.period - 3).to_s + 'OT'
+        end
     end
 end
 
@@ -307,18 +346,15 @@ class ScoreboardApp < Patchbay
     put '/team/:id' do
         id = params[:id].to_i
 
-        request.body.rewind
-        data = JSON.parse request.body.read
-
         if id == 0 or id == 1
             # trigger "goal" event
-            if @teams[id]['score'] + 1 == data['score']
+            if @teams[id]['score'] + 1 == incoming_json['score']
                 if @view.respond_to? :on_goal
                     @view.on_goal(id)
                 end
             end
 
-            @teams[id] = data
+            Thread.exclusive { @teams[id].clear.merge!(incoming_json) }
             p @teams
             render :json => ''
         else
@@ -336,18 +372,12 @@ class ScoreboardApp < Patchbay
     end
 
     put '/clock/period_remaining' do
-        request.body.rewind
-        data = JSON.parse request.body.read
-
-        @clock.period_remaining = data
+        @clock.period_remaining = incoming_json
         render :json => ''
     end
 
     put '/clock/running' do
-        request.body.rewind
-        data = JSON.parse request.body.read
-
-        if data['run']
+        if incoming_json['run']
             @clock.start
         else
             @clock.stop
@@ -366,43 +396,48 @@ class ScoreboardApp < Patchbay
     end
 
     post '/announce' do
-        request.body.rewind
-        data = JSON.parse request.body.read
-
-        @announces << data.message 
+        @announces << incoming_json['message']
 
         render :json => ''
     end
 
     put '/status' do
-        request.body.rewind
-        data = JSON.parse request.body.read
-
-        @status = data.message
-
+        @status = incoming_json['message']
         render :json => ''
     end
 
     get '/preview' do
-        @view.render_template
+        render :svg => @view.render_template
     end
 
-    def set_view(view)
+    def view=(view)
         @view = view
-        @view.announce = AnnounceHelper.new(@announce)
+        @view.announce = AnnounceHelper.new(@announces)
         @view.status = StatusHelper.new(@status)
-        @view.home_team = TeamHelper.new(@teams[0])
-        @view.away_team = TeamHelper.new(@teams[1])
+        @view.home_team = TeamHelper.new(@teams[0], @clock)
+        @view.away_team = TeamHelper.new(@teams[1], @clock)
+        @view.clock = ClockHelper.new(@clock)
     end
 
-    def render_view
-        @view.render
+    def view
+        @view
     end
 
     self.files_dir = 'public_html'
+
+protected
+    def incoming_json
+        unless params[:incoming_json]
+            inp = environment['rack.input']
+            inp.rewind
+            params[:incoming_json] = JSON.parse inp.read
+        end
+
+        params[:incoming_json]
+    end
 end
 
-def ScoreboardView
+class ScoreboardView
     def initialize(filename)
         @template = Erubis::Eruby.new(File.read(filename))
     end
@@ -415,13 +450,32 @@ def ScoreboardView
     def render_template
         @template.result({
             :announce => announce, :status => status, 
-            :home_team => home_team, :away_team => away_team
+            :home_team => home_team, :away_team => away_team,
+            :clock => clock
         })         
     end
 
-    attr_accessor :announce, :status, :home_team, :away_team
+    attr_accessor :announce, :status, :home_team, :away_team, :clock
 end
 
 app = ScoreboardApp.new
-app.run(:Host => '::', :Port => 3000)
+app.view = ScoreboardView.new('andrew_scoreboard.svg.erb')
+Thread.new { app.run(:Host => '::', :Port => 3000) }
 
+galpha = 255
+
+while true
+    # prepare next SVG frame
+    data = Thread.exclusive { app.view.render }
+    # build header with data length and global alpha
+    header = [ data.length, galpha ].pack('LC')
+
+    # wait for handshake byte from other end
+    if STDIN.read(1).nil?
+        break
+    end
+
+    # send SVG data with header
+    STDOUT.write(header)
+    STDOUT.write(data)
+end
