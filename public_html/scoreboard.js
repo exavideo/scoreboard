@@ -164,7 +164,9 @@ jQuery.fn.buildTeamControl = function() {
 
         $(elem).find(".penalty_list").sortable({ 
             connectWith: $(elem).find(".penalty_list"),
-            change: function() { $(this).team().putTeamData() }
+            stop: function() { 
+                $(this).team().putTeamData(); 
+            }
         });
         $(elem).find(".penalty_queue").build_penalty_queue();
     });
@@ -195,14 +197,27 @@ jQuery.fn.penaltyDialog = function() {
     return $(this).data("penaltyDialog");
 }
 
-// newPenalty
-function newPenalty(time) {
-    var penaltyDiv = $(this).team().penaltyDialog().find("#penaltyProto").clone();
-
+jQuery.fn.newPenaltyDiv = function() {
+    var penaltyDiv = $(this).penaltyDialog().find("#penaltyProto").clone(true);
     penaltyDiv.removeAttr('id');
+    penaltyDiv.find("#player").autocomplete({ 
+        source: $(this).data('roster'),
+        change: $(this).change()
+    });
+    penaltyDiv.find("#penalty").autocomplete({ 
+        source: autocompletePenalties,
+        change: $(this).change()
+    });
+    return penaltyDiv;
+}
+
+// newPenalty
+// add a penalty to the team's penalty queue
+function newPenalty(time) {
+    var penaltyDiv = $(this).team().newPenaltyDiv();
 
     // set up penalty time correctly (creative selector abuse)
-    penaltyDiv.find('select#penaltyType').val(time)
+    penaltyDiv.find('select#time').val(time)
 
     // add to the shorter of the two penalty queues
     $(this).team().queuePenalty(penaltyDiv);
@@ -278,8 +293,7 @@ jQuery.fn.unserializePenaltyListJson = function(data) {
     var thiz = this;
     $(this).penaltyQueueClear( );
     jQuery.each(data, function(i,e) {        
-        var penaltyDiv = $(thiz).team().penaltyDialog().find("#penaltyProto").clone();
-        penaltyDiv.removeAttr("id");
+        var penaltyDiv = $(thiz).team().newPenaltyDiv();
         penaltyDiv.unserializeInputsJson(e);
         $(thiz).find(".penalty_list").append(penaltyDiv);
     });
@@ -355,7 +369,12 @@ function penaltyQueueStartLastStop() {
 // goalScored
 // Stop clock and register a goal for the team.
 function goalScored() {
-
+    $(this).team().find("#score").val(
+        intOrZero($(this).team().find("#score").val()) + 1
+    );
+    $(this).team().putTeamData();
+    // trigger any kind of blinky goal animations (or whatever)
+    viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
 
 // lockControl
@@ -391,6 +410,9 @@ jQuery.fn.getTeamData = function() {
     var thiz = this; // javascript can be counter-intuitive...
     getJson($(this).data('url'), function(data) {
         $(thiz).find("#lockableInputs").unserializeInputsJson(data);
+        // important to set roster before we unserialize penalties
+        // else autocompletion might fail
+        $(thiz).data("roster", data.autocompletePlayers);
         $(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
     });
 }
@@ -413,6 +435,10 @@ function postAnnounce() {
 
 function postStatus() {
     putJson('/status', { message : announceStatusTextInput() });
+}
+
+function viewCommand(cmd) {
+    putJson('/view_command', cmd);
 }
 
 $(document).ready(function() {

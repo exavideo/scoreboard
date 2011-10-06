@@ -429,6 +429,11 @@ class ScoreboardApp < Patchbay
         render :json => ''
     end
 
+    put '/view_command' do
+        p incoming_json
+        render :json => ''
+    end
+
     get '/preview' do
         render :svg => @view.render_template
     end
