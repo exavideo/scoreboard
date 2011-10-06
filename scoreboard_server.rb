@@ -99,8 +99,16 @@ class TeamHelper
         @team_data['name']
     end
 
+    def fgcolor
+        @team_data['fgcolor']
+    end
+
+    def bgcolor
+        @team_data['bgcolor']
+    end
+
     def color
-        @team_data['color']
+        bgcolor
     end
     
     def score
@@ -120,7 +128,7 @@ class TeamHelper
     end
 
     def penalties
-        PenaltyHelper.new(team_data['penalties'], @clock)
+        PenaltyHelper.new(@team_data['penalties'], @clock)
     end
 
     def strength
@@ -137,7 +145,7 @@ class PenaltyHelper
     def strength
         s = 5
         @penalty_data['activeQueues'].each_with_index do |queue, i|
-            qstart = @penalty_data['activeQueueStarts'][i]
+            qstart = @penalty_data['activeQueueStarts'][i].to_i
             qlength = queue_length(queue)
             if qlength > 0 and @clock.time_elapsed < qstart + qlength
                 s -= 1
@@ -151,12 +159,12 @@ class PenaltyHelper
         result = -1
 
         @penalty_data['activeQueues'].each_with_index do |queue, i|
-            qstart = @penalty_data['activeQueueStarts'][i]
+            qstart = @penalty_data['activeQueueStarts'][i].to_i
             qlength = queue_length(queue)
             qend = qstart + qlength
             time_remaining_on_queue = qend - @clock.time_elapsed
 
-            if time_remaining > 0
+            if time_remaining_on_queue > 0
                 if time_remaining_on_queue < result or result == -1
                     result = time_remaining_on_queue 
                 end
@@ -174,7 +182,7 @@ protected
     def queue_length(q)
         time = 0
         q.each do |penalty|
-            time += penalty['time']
+            time += penalty['time'].to_i
         end
         
         time
@@ -309,7 +317,8 @@ class ScoreboardApp < Patchbay
                 # Team name
                 'name' => 'RPI',
                 # color value to be used for team name display.
-                'color' => '#D40000',
+                'fgcolor' => '#ffffff',
+                'bgcolor' => '#D40000',
                 # number of points scored by this team
                 'score' => 0,
 
@@ -324,9 +333,6 @@ class ScoreboardApp < Patchbay
                 # penalty queues (for hockey)
                 # A penalty consists of player, penalty, length.
                 'penalties' => {
-                    # All penalties which have been announced, but not yet queued.
-                    'announcedQueue' => [],
-
                     # Only two players may serve penalties at a time. These arrays
                     # represent the "stacks" of penalties thus formed.
                     'activeQueues' => [ [], [] ],
@@ -365,14 +371,7 @@ class ScoreboardApp < Patchbay
         id = params[:id].to_i
 
         if id == 0 or id == 1
-            # trigger "goal" event
-            if @teams[id]['score'] + 1 == incoming_json['score']
-                if @view.respond_to? :on_goal
-                    @view.on_goal(id)
-                end
-            end
-
-            Thread.exclusive { @teams[id].clear.merge!(incoming_json) }
+            Thread.exclusive { @teams[id].merge!(incoming_json) }
             p @teams
             render :json => ''
         else
@@ -414,7 +413,13 @@ class ScoreboardApp < Patchbay
     end
 
     post '/announce' do
-        @announces << incoming_json['message']
+        if incoming_json.has_key? 'messages'
+            @announces.concat(incoming_json['messages'])
+        else
+            @announces << incoming_json['message']
+        end
+
+        p @announces
 
         render :json => ''
     end
@@ -455,7 +460,37 @@ protected
     end
 end
 
+module TimeHelpers
+    def format_time_without_tenths(time)
+        seconds = time / 10
+        minutes = seconds / 60
+        seconds = seconds % 60
+
+        format "%d:%02d", minutes, seconds
+    end
+
+    def format_time_with_tenths_conditional(time)
+        tenths = time % 10
+        seconds = time / 10
+        
+        minutes = seconds / 60
+        seconds = seconds % 60
+
+        if minutes == 0
+            format ":%02d.%d", seconds, tenths
+        else
+            format "%d:%02d", minutes, seconds
+        end
+    end
+end
+
+module ViewHelpers
+    include TimeHelpers
+end
+
 class ScoreboardView
+    include ViewHelpers
+
     def initialize(filename)
         @template = Erubis::Eruby.new(File.read(filename))
     end
@@ -466,11 +501,7 @@ class ScoreboardView
     end
 
     def render_template
-        @template.result({
-            :announce => announce, :status => status, 
-            :home_team => home_team, :away_team => away_team,
-            :clock => clock
-        })         
+        @template.result(binding)
     end
 
     attr_accessor :announce, :status, :home_team, :away_team, :clock
@@ -478,7 +509,7 @@ end
 
 app = ScoreboardApp.new
 app.view = ScoreboardView.new('andrew_scoreboard.svg.erb')
-Thread.new { app.run(:Host => '::', :Port => 3000) }
+Thread.new { app.run(:Host => '::', :Port => 3001) }
 
 galpha = 255
 

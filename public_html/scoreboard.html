@@ -24,10 +24,10 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.15.custom.css" />
 
         <style type="text/css">
-            .penalty_queue { float: left; width: 200px; }
+            .penalty_queue { float: left; width: 300px; }
 
-            #penalty_queue_dialog input {
-                width: 80px;
+            .penaltyData input {
+                width: 100%;
             }
 
             .penalty_list { 
@@ -41,44 +41,97 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 background-color: #888;
                 color: white;
             }
+
+            .teamControl {
+                float: left;
+                width: 300px;
+            }
+
+            #main {
+                padding: 10px;
+            }
         </style>
 
         <script src="scoreboard.js"></script>
     </head>
         
     <body>
-        <!-- global state/control -->
-        <div style="float:left">
-            <div id="global"><h1 id="clock"></h1></div>
-            <div id="preview"><img src="/preview" /></div>
-        </div>
-        <!-- team-specific controls -->
-        <div style="float:left" id="home_control">
-            <h1 id="name"></h1>
-            <p>Score</p>
-            <h1 id="score"></h1>
-            <p>Shots on Goal</p>
-            <h2 id="shots"></h2>
-            <p>Timeouts Left</p>
-            <h2 id="timeouts"></h2>
-        </div>
-        <div style="float:left" id="away_control">
-            <h1 id="name"></h1>
-            <p>Score</p>
-            <h1 id="score"></h1>
-            <p>Shots on Goal</p>
-            <h2 id="shots"></h2>
-            <p>Timeouts Left</p>
-            <h2 id="timeouts"></h2>
-        </div>
-        <div style="clear:left"></div>
-        <div id="footer"><img src="ExavideoLogo60h.png"></div>
+        <div id="main">
+            <!-- global state/control -->
+            <div style="float:left">
+                <div id="clockControl">
+                    <h1 id="clock"></h1>
+                    <button id="startClock">Start</button>
+                    <button id="stopClock">Stop</button>
+                </div>
+                <div id="announceControl">
+                    <input type="text" id="textInput" /><br />
+                    <button id="announce">Announce</button>
+                    <button id="status">Status</button>
+                    <button id="clearStatus">Clear Status</button>
+                </div>
+                <div id="preview"><img src="/preview" /></div>
+            </div>
 
-        <div id="edit_form" class="dialog">
-            <form>
-                <input type="text" id="field" name="field" />
-            </form>
+            <div class="teamControl" id="homeTeamControl"></div>
+            <div class="teamControl" id="awayTeamControl"></div>
+            <div style="clear:left"></div>
         </div>
+
+        <div style="display: none" id="teamProto">
+            <table id="lockableInputs">
+                <tr><td>Name</td><td><input type="text" id="name" /></td></tr>
+                <tr><td>FgColor</td><td><input type="text" id="fgcolor" /></td></tr>
+                <tr><td>BgColor</td><td><input type="text" id="bgcolor" /></td></tr>
+                <tr><td>Score</td><td><input type="text" id="score" /></td></tr>
+                <tr><td>Shots</td><td><input type="text" id="shotsOnGoal" /></td></tr>
+            </table>
+
+            <button id="lockControl">Lock Controls</button>
+            <button id="unlockControl">Unlock Controls</button>
+            <button id="goal">Goal</button>
+            <button id="minorPenalty">Minor Penalty</button>
+            <button id="majorPenalty">Major Penalty</button>
+            <button id="clearPenalties">Clear Penalties</button>
+            <button id="editPenalties">Edit Penalties</button>
+
+            <div id="penalty_queue_dialog" class="dialog">
+                <div class="penalty_queue" id="pq1"> 
+                    <label for="start">Start Time</label>
+                    <input type="text" name="start" id="start" />
+                    <button id="now">Now</button><button id="last">Last Stop</button>
+                    <ul class="penalty_list"></ul>
+                </div>
+                <div class="penalty_queue" id="pq2">
+                    <label for="start">Start Time</label>
+                    <input type="text" name="start" id="start" />
+                    <button id="now">Now</button><button id="last">Last Stop</button>
+                    <ul class="penalty_list"></ul>
+                </div>
+
+                <ul style="display: none">
+                    <li id="penaltyProto" class="penaltyData">
+                        <table>
+                            <tr><td>Player</td><td><input type="text" id="player" /></td></tr>
+                            <tr><td>Penalty</td><td><input type="text" id="penalty" /></td></tr>
+                            <tr><td>Time</td><td>
+                                <select id="time" name="time">
+                                    <option id="time_1200" value="1200">Minor (2:00)</option>
+                                    <option id="time_2400" value="2400">Double Minor (4:00)</option>
+                                    <option id="time_3000" value="3000">Major (5:00)</option>
+                                    <option id="time_6000" value="6000">Misconduct (10:00)</option>
+                                </select>
+                            </td></tr>
+                        </table>
+                    </li>
+                </ul>
+
+                <div style="clear: both"></div>
+                <div><button id="clearAllPenalties">Remove All</button></div>
+            </div>
+        </div>
+
+        <div id="footer"><img src="ExavideoLogo60h.png"></div>
 
         <div id="announce_goal_form" class="dialog">
             <form> 
@@ -100,47 +153,5 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 </p>
             </form>
         </div>
-
-        <div id="announce_penalty_form" class="dialog">
-            <form>
-                <p>
-                    <label for="player">Player</label>
-                    <input type="text" name="player" id="player" />
-                </p>
-                <p>
-                    <label for="penalty">Penalty</label>
-                    <input type="text" name="penalty" id="penalty" />
-                </p>
-                <p>
-                    <label for="penaltyType">Penalty Type</label>
-                    <select id="penaltyType" name="penaltyType">
-                        <option value="2">Minor (2:00)</option>
-                        <option value="4">Double Minor (4:00)</option>
-                        <option value="5">Major (5:00)</option>
-                        <option value="10">Misconduct (10:00)</option>
-                    </select>
-            </form>
-        </div>
-
-        <div id="penalty_queue_dialog" class="dialog" style="width: 800px">
-                <div class="penalty_queue"> 
-                    <label for="pq1start">Start Time</label>
-                    <input type="text" name="pq1start" id="pq1start" />
-                    <ul id="pq1" class="penalty_list"></ul>
-                </div>
-                <div class="penalty_queue">
-                    <label for="pq2start">Start Time</label>
-                    <input type="text" name="pq2start" id="pq2start" />
-                    <ul id="pq2" class="penalty_list"></ul>
-                </div>
-                <div class="penalty_queue">
-                    Announced Only
-                    <ul id="pqa" class="penalty_list"></ul>
-                </div>
-                <div style="clear: both"></div>
-                <div><button id="clearAllPenalties">Remove All</button></div>
-            </div>
-        </div>
     </body>
-
 </html>

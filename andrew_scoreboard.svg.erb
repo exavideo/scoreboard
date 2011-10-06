@@ -146,12 +146,55 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
     </g>
 <% end %>
 
+<% 
+    if home_team.strength < 5 or away_team.strength < 5           
+        smaller, bigger = [home_team.strength, away_team.strength].minmax
+
+        time_to_change = format_time_without_tenths([
+            home_team.penalties.time_to_strength_change, 
+            away_team.penalties.time_to_strength_change
+        ].reject { |x| x == 0 }.min)
+
+        if bigger == 5 and smaller == 4
+            message = "POWER PLAY #{time_to_change}"
+        else
+            message = "#{bigger}-ON-#{smaller} #{time_to_change}"
+        end
+%>
+
+    <g
+       id="powerPlayClock">
+      <path
+         d="m 83,587.36218 15,-30 280,0 -15,30 z"
+         id="path2989"
+         style="fill:#ffff00;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         x="229.82007"
+         y="580.1062"
+         id="text3026"
+         xml:space="preserve"
+         style="font-size:10px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
+           x="229.82007"
+           y="580.1062"
+           id="announceText"
+           style="font-size:22px"><%= message %></tspan></text>
+      <path
+         d="m 83,587.36218 15,-30 280,0 -15,30 z"
+         id="path5144"
+         style="fill:url(#g1);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         d="m 83,587.36218 15,-30 280,0 -15,30 z"
+         id="path5748"
+         style="fill:url(#g2);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+<% end %>
+
     <g
        id="homeTeam">
       <path
          d="m 208,597.36218 -22.5,45 95,0 22.5,-45 z"
          id="homeTeamBkgd"
-         style="fill:<%= home_team.color %>;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+         style="fill:<%= home_team.bgcolor %>;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <text
          x="244.30907"
          y="628.26221"
@@ -161,7 +204,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
            x="244.30907"
            y="628.26221"
            id="homeTeamNameText"
-           style="font-size:24px;fill:#ffffff"><%= home_team.name %></tspan></text>
+           style="font-size:24px;fill:<%= home_team.fgcolor %>"><%= home_team.name %></tspan></text>
       <path
          d="m 208,597.36218 -22.5,45 95,0 22.5,-45 z"
          id="path5662"
@@ -200,13 +243,13 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
       <path
          d="m 180.5,652.36218 -22.5,45 95,0 22.5,-45 z"
          id="path2993"
-         style="fill:<%= away_team.color %>;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+         style="fill:<%= away_team.bgcolor %>;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <text
          x="216.86513"
          y="683.26221"
          id="text3053"
          xml:space="preserve"
-         style="font-size:10px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
+         style="font-size:10px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:<%= away_team.fgcolor %>;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
            x="216.86513"
            y="683.26221"
            id="awayTeamNameText"

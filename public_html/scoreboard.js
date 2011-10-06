@@ -17,38 +17,11 @@
  * along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function initializeTeam() {
-    var teamState = new Object( );
-    
-    teamState.penalties = new Object( );
-    teamState.penalties.activeQueueStarts = [ 0, 0 ];
-    teamState.penalties.activeQueues = [ new Array(), new Array() ];
-    teamState.penalties.announcedQueue = new Array();
-    teamState.name = "RPI";
-    teamState.color = "#D40000";
-    teamState.score = 0;
-    teamState.shotsOnGoal = 0;
-    teamState.autocompletePlayers = []
-    teamState.timeoutsLeft = 3;
-    teamState.timeoutNowInUse = false;
 
-    return teamState;
-}
-
-autocompletePenalties = ["SUCKING"];
-
-teamStates = new Array( );
-teamStates[0] = initializeTeam( );
-teamStates[1] = initializeTeam( );
-
-teamControlPanels = new Array( );
-penaltyQueues = new Array( );
-penaltyQueues[0] = new Array( );
-penaltyQueues[1] = new Array( );
-
-clockState = new Object( )
-
-lastStopTimeElapsed = 0;
+"use strict";
+var autocompletePenalties = ["SUCKING"];
+var clockState = { };
+var lastStopTimeElapsed = 0;
 
 function getJson(sourceurl, callback) {
     jQuery.ajax({
@@ -87,52 +60,14 @@ function postJson(desturl, obj) {
     });
 }
 
-jQuery.fn.appendButton = function(name, onClick, arg) {
-    var button = $('<button />');
-    var div = $('<div/>');
-
-    button.click(function() { onClick(arg) });
-    button.text(name)
-    div.append(button);
-
-    return this.append(div);
-}
-
-jQuery.fn.buttonAfter = function(name, onClick) {
-    var button = $('<button />');
-    button.click(onClick);
-    button.text(name);
-    return this.after(button);
-}
-
-jQuery.fn.appendH1 = function(initialValue, id) {
-    var h1 = $('<h1></h1>');
-    h1.attr("id", id);
-    return this;
-}
-
-jQuery.fn.ok_cancel_dialog = function(title, callback) {
-    this.find().val(""); // clear out form
-    this.dialog("option", "buttons", {
-        "Cancel" : function( ) {
-            $(this).dialog("close");
-        },
-        "OK" : function( ) {
-            callback.apply(this);
-        }
+function fieldsetToJson(fieldset) {
+    var fields = fieldset.serializeArray();
+    var result = { };
+    $.each(fields, function(i, field) {
+        result[field.name] = field.value;
     });
-    this.dialog("option", "title", title);
-    this.dialog("open")
-}
 
-// Ask the user for a textual value and pass it to the callback if accepted.
-function editText(title, callback) {
-    // setup dialog for text input
-    $("#edit_form").ok_cancel_dialog(title, function( ) {
-        var value = $(this).find("#field").val( );
-        $(this).dialog("close");
-        callback(value);
-    });
+    return result;
 }
 
 function isInt(x) {
@@ -144,199 +79,17 @@ function isInt(x) {
     return (x == y && x.toString() == y.toString());
 }
 
-// Ask the user for a numeric value. Pass it to the callback if accepted.
-function editNumeric(title, callback) {
-    // setup dialog for numeric input
-    $("#edit_form").ok_cancel_dialog(title, function() {
-        var val = $(this).find("#field").val( );
-        if (isInt(val)) {
-            $(this).dialog("close");
-            callback(parseInt(val));
-        } else {
-            $(this).find("#field").addClass("ui-state-error");
-        }
-    });
-}
-
-function setupTeam(team) {
-    editText(
-        "Team Name",
-        function(newValue) { 
-            teamStates[team].name = newValue;
-            updateTeamState(team);
-        }
-    );
-}
-
-function announceGoal(teamId) {
-    var team = teamStates[teamId];
-
-    // autocomplete player names
-    $("#announce_goal_form").find("input").autocomplete({
-        source: team.autocompletePlayers
-    });
-
-    $("#announce_goal_form").ok_cancel_dialog(
-        team.name + " Goal",
-        function() {
-            // collect form data
-            var scorer = "G: " + $(this).find("#scorer").val();
-            var assisters = $(this).find("#assist").map(function(){ 
-                var val = $(this).val( );
-                if (val != "") {
-                    return "A: " + val;
-                }
-            }).get( );
-
-            // build announcement
-            announce_data = [team.name + " GOAL", scorer].concat(assisters);
-            postJson("/announce", announce_data);
-
-            $(this).dialog("close");
-        }
-    );
-}
-
-function editShots(team) {
-    editNumeric(
-        "Shots on goal: " + teamStates[team].name,
-        function(newValue) {
-            teamStates[team].shotsOnGoal = newValue;
-            updateTeamState(team);
-        }
-    );
-}
-
-function editScore(team) {
-    editNumeric(
-        "Score: " + teamStates[team].name, 
-        function(newValue) {
-            teamStates[team].score = newValue;
-            updateTeamState(team);
-        }
-    );
-}
-
-function announcePenalty(teamId) {
-    var team = teamStates[teamId];
-    
-    // clear form
-    $("#announce_penalty_form").find("input").val("");
-
-    // set up autocompletion
-    $("#announce_penalty_form").find("#penalty").autocomplete({
-        source: autocompletePenalties
-    });
-
-    $("#announce_penalty_form").find("#player").autocomplete({
-        source: team.autocompletePlayers
-    });
-
-    // show dialog
-    $("#announce_penalty_form").ok_cancel_dialog(
-        "Announce " + team.name + " Penalty", 
-        function() {
-            // make penalty object from form
-            var penaltyObj = new Object();
-            penaltyObj.player = $("#announce_penalty_form").find("#player").val();
-            penaltyObj.penalty = $("#announce_penalty_form").find("#penalty").val();
-            penaltyObj.time = $("#announce_penalty_form").find("#penaltyType").val();
-
-            // add to team's "announced" queue
-            team.penalties.announcedQueue.push(penaltyObj)
-
-            // send back to server
-            updateTeamState(teamId);
-
-            $(this).dialog("close");
-        }
-    );
-    
-}
-
-function populatePenaltyQueue(where, penalties) {
-    $.each(penalties, function(i,p) {
-        var entry = $('<li />');
-        entry.addClass("penaltyEntry");
-        entry.data("penaltyObj", p);
-        entry.text(p.player + ' - ' + p.penalty
-                + ' [' + p.time + ':00]');
-        entry.appendButton(
-            "Remove", 
-            function() {
-                entry.detach();    
-            },
-            null
-        );
-        where.append(entry);
-    });
-}
-
-function extractPenaltyData(fromWhere) {
-    return fromWhere.find("li")
-        .map(function(i, x) { return $(x).data("penaltyObj") })
-        .get();
-}
-
-function savePenaltyQueues(team) {
-    team.penalties.activeQueues[0] = extractPenaltyData($("#pq1"));
-    team.penalties.activeQueues[1] = extractPenaltyData($("#pq2"));
-    team.penalties.announcedQueue = extractPenaltyData($("#pqa"));
-}
-
-function viewPenaltyQueues(team) {
-    var team = teamStates[team];
-
-    // empty the dialog
-    $("#penalty_queue_dialog").find(".penaltyEntry").remove( );
-
-    // populate penalty queues
-    populatePenaltyQueue($("#penalty_queue_dialog").find("#pq1"), 
-            team.penalties.activeQueues[0]);
-    populatePenaltyQueue($("#penalty_queue_dialog").find("#pq2"),
-            team.penalties.activeQueues[1]);
-    populatePenaltyQueue($("#penalty_queue_dialog").find("#pqa"),
-            team.penalties.announcedQueue);
-
-    $("#penalty_queue_dialog").find("#clearAllPenalties").click(function() {
-        $("#penalty_queue_dialog").find(".penaltyEntry").remove( );
-    });
-    
-
-    // ready to go (in theory...)
-    $("#penalty_queue_dialog").dialog("option", "width", "800");
-    $("#penalty_queue_dialog").dialog("option", "height", "600");
-    $("#penalty_queue_dialog").ok_cancel_dialog(
-        "Edit " + team.name + " Penalty Queue",
-        function() { 
-            savePenaltyQueues(team);
-            $(this).dialog("close"); 
-        }
-    );
-
-}
-
-function useTimeout(teamId) {
-    var team = teamStates[teamId];
-    
-    if (team.timeoutsLeft > 0) {
-        stopClock(0);
-        team.timeoutsLeft = team.timeoutsLeft - 1;
-        team.timeoutNowInUse = true;
-        updateTeamState(teamId);
+function intOrZero(x) {
+    if (isInt(x)) {
+        return parseInt(x);
+    } else {
+        return 0;
     }
 }
 
 function startClock(dummy) {
     // save the time for penalties
     lastStopTimeElapsed = clockState.time_elapsed;
-
-    // clear out any ongoing timeouts 
-    teamStates[0].timeoutNowInUse = false;
-    teamStates[1].timeoutNowInUse = false;
-    updateTeamState(0);
-    updateTeamState(1);
-
     putJson('/clock/running', { 'run' : true }); 
 }
 
@@ -367,7 +120,7 @@ function updateClock( ) {
         var period = data.period;
         var isRunning = data.running;
 
-        var clockField = $("#global").find("#clock");
+        var clockField = $("#clockControl").find("#clock");
 
         if (isRunning) {
             clockField.addClass("clock_running");
@@ -381,68 +134,6 @@ function updateClock( ) {
     });
 }
 
-function generalAnnounce(dummy) {
-    editText("General Announcement", function(text) {
-        postJson("/announce", { message : text });
-        $(this).dialog("close");
-    });
-}
-
-function generalStatus(dummy) {
-    editText("General Status Message", function(text) {
-        putJson("/status", { message : text });
-        $(this).dialog("close");
-    });
-}
-
-jQuery.fn.buildTeamPanel = function(teamId) {
-    teamControlPanels[teamId] = this;
-    return this
-        .appendButton("Team Setup", setupTeam, teamId)
-        .appendButton("Announce Goal", announceGoal, teamId)
-        .appendButton("Use Timeout", useTimeout, teamId)
-        .appendButton("Edit Score", editScore, teamId)
-        .appendButton("Shots on Goal", editShots, teamId)
-        .appendButton("Announce Penalty", announcePenalty, teamId)
-        .appendButton("Penalty Queue", viewPenaltyQueues, teamId);
-}
-
-jQuery.fn.buildGlobalPanel = function() {
-    return this
-        .appendButton("Start Clock", startClock, 0)
-        .appendButton("Stop Clock", stopClock, 0)
-        .appendButton("General Announce", generalAnnounce, 0)
-        .appendButton("General Status", generalStatus, 0);
-}
-
-function updateTeamStateDisplay(teamId) {
-    var teamState = teamStates[teamId];
-    var teamPanel = teamControlPanels[teamId];
-
-    teamPanel.find("#name").text(teamState.name);
-    teamPanel.find("#score").text(teamState.score);
-    teamPanel.find("#shots").text(teamState.shotsOnGoal);
-    teamPanel.find("#timeouts").text(teamState.timeoutsLeft);
-}
-
-function updateTeamStateAjax(teamId) {
-    var team = teamStates[teamId];
-    putJson("/team/" + teamId, team);
-}
-
-function updateTeamState(teamId) {
-    updateTeamStateDisplay(teamId);
-    updateTeamStateAjax(teamId);
-}
-
-
-function fetchTeamState(teamId) {
-    getJson("/team/" + teamId, function(data) {
-        teamStates[teamId] = data;
-        updateTeamStateDisplay(teamId);
-    });
-}
-
 function updateClockTimeout( ) {
     updateClock( );
     setTimeout(updateClockTimeout, 100);
@@ -453,33 +144,250 @@ function updatePreviewTimeout( ) {
     setTimeout(updatePreviewTimeout, 1000);
 }
 
-function addPenaltyTimeButtons(where) {
-    where.buttonAfter("Last Clock Start", function() {
-        where.val(lastStopTimeElapsed); 
-    }).buttonAfter("Time Now", function() { 
-        where.val(clockState.time_elapsed);
+jQuery.fn.buildTeamControl = function() {
+    $(this).each(function(index, elem) {
+        $(elem).html($("#teamProto").html());
+
+        // hang onto this because jQuery will move it later
+        $(elem).data("penaltyDialog", $(elem).find("#penalty_queue_dialog"));
+        $(elem).find("#penalty_queue_dialog").data("team", $(elem));
+
+        $(elem).find("#lockControl").click(lockControl);
+        $(elem).find("#unlockControl").click(unlockControl);
+        $(elem).find("#goal").click(goalScored);
+        $(elem).find("#minorPenalty").click(function() { newPenalty.call(this, 1200); });
+        $(elem).find("#majorPenalty").click(function() { newPenalty.call(this, 3000); });
+        $(elem).find("#clearPenalties").click(clearPenalties);
+        $(elem).find("#editPenalties").click(editPenalties);
+
+        $(elem).find("input,select").change(function() { $(this).team().putTeamData() });
+
+        $(elem).find(".penalty_list").sortable({ 
+            connectWith: $(elem).find(".penalty_list"),
+            change: function() { $(this).team().putTeamData() }
+        });
+        $(elem).find(".penalty_queue").build_penalty_queue();
     });
 }
 
-$(document).ready(function() {
-    $("#global").buildGlobalPanel();
-    $("#home_control").buildTeamPanel(0);
-    $("#away_control").buildTeamPanel(1);
+jQuery.fn.build_penalty_queue = function() {
+    $(this).each(function(index, elem) {
+        $(elem).find("#now").click(penaltyQueueStartNow);
+        $(elem).find("#last").click(penaltyQueueStartLastStop);
+    });
+}
 
-    fetchTeamState(0);
-    fetchTeamState(1);
+jQuery.fn.team = function() {
+    var teamControl = $(this).closest(".teamControl");
+
+    if (teamControl.length == 0) {
+        return $(this).closest("#penalty_queue_dialog").data("team");
+    } else {
+        return teamControl;
+    }
+}
+
+jQuery.fn.penaltyQueue = function() {
+    return $(this).closest(".penalty_queue");
+}
+
+jQuery.fn.penaltyDialog = function() {
+    return $(this).data("penaltyDialog");
+}
+
+// newPenalty
+function newPenalty(time) {
+    var penaltyDiv = $(this).team().penaltyDialog().find("#penaltyProto").clone();
+
+    penaltyDiv.removeAttr('id');
+
+    // set up penalty time correctly (creative selector abuse)
+    penaltyDiv.find('select#penaltyType').val(time)
+
+    // add to the shorter of the two penalty queues
+    $(this).team().queuePenalty(penaltyDiv);
+
+    // sync team data
+    $(this).team().putTeamData();
+}
+
+// queuePenalty
+jQuery.fn.queuePenalty = function(penalty_div) {
+    var penaltyQueues = $(this).penaltyDialog().find(".penalty_queue");
+    
+    var min_queue_end = -1;
+    var queue_with_min_end = 0;
+
+    // find which queue has the shortest length
+    penaltyQueues.each(function(i, q) {
+        var qend = $(q).penaltyQueueEnd();
+        if (qend < min_queue_end || min_queue_end == -1) {
+            min_queue_end = qend;
+            queue_with_min_end = i;
+        }
+    });
+
+    // queue the penalty
+    var queue = penaltyQueues[queue_with_min_end]
+    if ($(queue).penaltyQueueEnd() == 0) {
+        // start penalty queue now if it had no penalties or just expired ones
+        $(queue).penaltyQueueClear();
+        $(queue).penaltyQueueStartNow();
+    }
+
+    $(queue).find(".penalty_list").append(penalty_div);
+}
+
+jQuery.fn.penaltiesJson = function() {
+    var json = { }
+    json.activeQueueStarts = $(this).find(".penalty_queue").map(
+        function(i,e) {
+            return [$(e).find("#start").val()];
+        }
+    ).get();
+    json.activeQueues = $(this).find(".penalty_queue").map(
+        function(i,e) {
+            return [$(e).penaltyListJson()];
+        }
+    ).get();
+
+    return json;
+}
+
+jQuery.fn.penaltyListJson = function() {
+    var json = $(this).find(".penaltyData").map(function(i,e) {
+        return [$(e).serializeInputsJson()];
+    }).get();
+
+    return json;
+}
+
+
+// Clear the penalty queue.
+jQuery.fn.penaltyQueueClear = function() {
+    $(this).find(".penaltyData").remove();
+}
+
+// Start the penalty queue's start time to now.
+jQuery.fn.penaltyQueueStartNow = function() {
+    $(this).find("#start").val(clockState.time_elapsed);
+}
+
+// Find the time at which a penalty queue will end.
+// e.g. $("#homeTeam #pq1").penaltyQueueEnd()
+// Return zero if no penalties are on the queue or they are all expired.
+jQuery.fn.penaltyQueueEnd = function() {
+    var total = 0;
+    var time = clockState.time_elapsed;
+    var penalty_end = intOrZero($(this).find("#start").val());
+    var count = 0;
+
+    $(this).find(".penaltyData").each(function(i,e) {
+        penalty_end = penalty_end + $(e).penaltyLength();
+        count++;
+    });
+
+    if (penalty_end < time || count == 0) {
+        return 0;
+    } else {
+        return penalty_end;
+    }
+}
+
+// penaltyLength
+// Find the length of a penalty...
+// e.g. $("find_some_penalty_div").penaltyLength()
+jQuery.fn.penaltyLength = function() {
+    return $(this).find("select option:selected").val();
+}
+
+
+// clearPenalties
+// Clear all penalties on a team.
+function clearPenalties() {
+    $(this).team().penaltyDialog()
+        .find(".penalty_queue .penaltyData").remove();
+}
+
+// editPenalties
+// Bring up penalty queue dialog box for a team.
+function editPenalties() {
+    $(this).team().penaltyDialog().dialog('option', 'width', 700);
+    $(this).team().penaltyDialog().dialog('open');
+}
+
+// penaltyQueueStartNow
+// Start the penalty queue now.
+function penaltyQueueStartNow() {
+    $(this).penaltyQueue().penaltyQueueStartNow();
+}
+
+// penaltyQueueStartLastStop
+// Set penalty queue start time to last play stoppage
+function penaltyQueueStartLastStop() {
+    $(this).penaltyQueue().find("#start").val(lastStopTimeElapsed);
+}
+
+// goalScored
+// Stop clock and register a goal for the team.
+function goalScored() {
+
+}
+
+// lockControl
+// Toggle whether the team setup controls are locked or unlocked.
+function lockControl() {
+    $(this).team().find("#lockableInputs input").attr("disabled","disabled");
+}
+
+function unlockControl() {
+    $(this).team().find("#lockableInputs input").removeAttr("disabled");
+}
+
+jQuery.fn.serializeInputsJson = function() {
+    var result = { };
+    $(this).find("input,select").each(function(i,e) {
+        result[$(e).attr('id')] = $(e).val();
+    });
+    return result;
+}
+
+// putTeamData
+// Synchronize team data back to the server.
+jQuery.fn.putTeamData = function() {
+    var json = $(this).find("#lockableInputs").serializeInputsJson();
+    json['penalties'] = $(this).penaltyDialog().penaltiesJson();
+    putJson($(this).data('url'), json);
+}
+
+function announceStatusTextInput() {
+    return $("#announceControl #textInput").val();
+}
+
+function postAnnounce() {
+    postJson('/announce', { message : announceStatusTextInput() });     
+}
+
+function postStatus() {
+    putJson('/status', { message : announceStatusTextInput() });
+}
+
+$(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
 
+    $(".teamControl").buildTeamControl();
+    $("#homeTeamControl").data('url','/team/0');
+    $("#awayTeamControl").data('url','/team/1');
+
     $(".dialog").dialog({
         autoOpen: false,
-        //modal: true,
+        modal: true,
         resizable: false,
     });
 
-    $(".penalty_list").sortable({ connectWith: ".penalty_list" });
-
-    addPenaltyTimeButtons($("#pq1start"));
-    addPenaltyTimeButtons($("#pq2start"));
-
+    $("#startClock").click(startClock);
+    $("#stopClock").click(stopClock);
+    $("#announceControl #announce").click(postAnnounce);
+    $("#announceControl #status").click(postStatus);
 });
