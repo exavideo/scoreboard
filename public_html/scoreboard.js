@@ -238,7 +238,7 @@ jQuery.fn.queuePenalty = function(penalty_div) {
     $(queue).find(".penalty_list").append(penalty_div);
 }
 
-jQuery.fn.penaltiesJson = function() {
+jQuery.fn.serializePenaltiesJson = function() {
     var json = { }
     json.activeQueueStarts = $(this).find(".penalty_queue").map(
         function(i,e) {
@@ -247,19 +247,42 @@ jQuery.fn.penaltiesJson = function() {
     ).get();
     json.activeQueues = $(this).find(".penalty_queue").map(
         function(i,e) {
-            return [$(e).penaltyListJson()];
+            return [$(e).serializePenaltyListJson()];
         }
     ).get();
 
     return json;
 }
 
-jQuery.fn.penaltyListJson = function() {
+jQuery.fn.serializePenaltyListJson = function() {
     var json = $(this).find(".penaltyData").map(function(i,e) {
         return [$(e).serializeInputsJson()];
     }).get();
 
     return json;
+}
+
+jQuery.fn.unserializePenaltiesJson = function(data) {
+    $(this).find(".penalty_queue").each(function(i,e) {
+        if (i < data.activeQueueStarts.length) {
+            $(e).find("#start").val(data.activeQueueStarts[i]);
+        }
+
+        if (i < data.activeQueues.length) {
+            $(e).unserializePenaltyListJson(data.activeQueues[i]);
+        }
+    });
+}
+
+jQuery.fn.unserializePenaltyListJson = function(data) {
+    var thiz = this;
+    $(this).penaltyQueueClear( );
+    jQuery.each(data, function(i,e) {        
+        var penaltyDiv = $(thiz).team().penaltyDialog().find("#penaltyProto").clone();
+        penaltyDiv.removeAttr("id");
+        penaltyDiv.unserializeInputsJson(e);
+        $(thiz).find(".penalty_list").append(penaltyDiv);
+    });
 }
 
 
@@ -344,6 +367,8 @@ function unlockControl() {
     $(this).team().find("#lockableInputs input").removeAttr("disabled");
 }
 
+// serializeInputsJson
+// get values of all input fields within the matched elements as JSON
 jQuery.fn.serializeInputsJson = function() {
     var result = { };
     $(this).find("input,select").each(function(i,e) {
@@ -352,11 +377,28 @@ jQuery.fn.serializeInputsJson = function() {
     return result;
 }
 
+// unserializeInputsJson
+// take all properties of the object and try to set field values 
+jQuery.fn.unserializeInputsJson = function(data) {
+    for (var prop in data) {
+        $(this).find("input#"+prop).val(data[prop]);
+        $(this).find("select#"+prop).val(data[prop]);
+    }
+}
+
+jQuery.fn.getTeamData = function() {
+    var thiz = this; // javascript can be counter-intuitive...
+    getJson($(this).data('url'), function(data) {
+        $(thiz).find("#lockableInputs").unserializeInputsJson(data);
+        $(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
+    });
+}
+
 // putTeamData
 // Synchronize team data back to the server.
 jQuery.fn.putTeamData = function() {
     var json = $(this).find("#lockableInputs").serializeInputsJson();
-    json['penalties'] = $(this).penaltyDialog().penaltiesJson();
+    json['penalties'] = $(this).penaltyDialog().serializePenaltiesJson();
     putJson($(this).data('url'), json);
 }
 
@@ -377,8 +419,11 @@ $(document).ready(function() {
     updatePreviewTimeout( );
 
     $(".teamControl").buildTeamControl();
+    // set up team URLs and load initial data
     $("#homeTeamControl").data('url','/team/0');
+    $("#homeTeamControl").getTeamData();
     $("#awayTeamControl").data('url','/team/1');
+    $("#awayTeamControl").getTeamData();
 
     $(".dialog").dialog({
         autoOpen: false,
