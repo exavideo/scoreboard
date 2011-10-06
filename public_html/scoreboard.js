@@ -330,6 +330,7 @@ jQuery.fn.penaltyLength = function() {
 function clearPenalties() {
     $(this).team().penaltyDialog()
         .find(".penalty_queue .penaltyData").remove();
+    $(this).team().putTeamData();
 }
 
 // editPenalties
