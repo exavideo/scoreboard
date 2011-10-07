@@ -28,6 +28,7 @@ class GameClock
         @last_start = nil
         # 20 minutes, in tenths of seconds
         @period_length = 20*60*10
+        @overtime_length = 5*60*10
         @period_end = @period_length
         @period = 1
     end
@@ -58,8 +59,12 @@ class GameClock
     def start
         if @value == @period_end
             # FIXME: handle overtimes correctly...
-            @period_end += @period_length
             @period += 1
+            if (@period > 3)
+                @period_end += @overtime_length
+            else
+                @period_end += @period_length
+            end
         end
 
         @last_start = Time.now 
