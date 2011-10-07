@@ -344,13 +344,12 @@ class ScoreboardApp < Patchbay
 
                 # roster autocompletion list
                 'autocompletePlayers' => [
-                    '#30 YORK',
-                    '#21 POLACEK',
                 ]
             },
             {
                 'name' => 'UNION',
-                'color' => '#800000',
+                'fgcolor' => '#ffffff',
+                'bgcolor' => '#800000',
                 'score' => 0,
                 'shotsOnGoal' => 0,
                 'timeoutsLeft' => 3,
@@ -361,7 +360,6 @@ class ScoreboardApp < Patchbay
                     'activeQueueStarts' => [ 0, 0 ]
                 },
                 'autocompletePlayers' => [
-                    '#21 SUCKS'
                 ]
             }
         ]
@@ -430,7 +428,8 @@ class ScoreboardApp < Patchbay
     end
 
     put '/view_command' do
-        p incoming_json
+        command_queue << incoming_json
+        p command_queue
         render :json => ''
     end
 
@@ -445,6 +444,7 @@ class ScoreboardApp < Patchbay
         @view.home_team = TeamHelper.new(@teams[0], @clock)
         @view.away_team = TeamHelper.new(@teams[1], @clock)
         @view.clock = ClockHelper.new(@clock)
+        @view.command_queue = command_queue
     end
 
     def view
@@ -462,6 +462,11 @@ protected
         end
 
         params[:incoming_json]
+    end
+
+    def command_queue
+        @command_queue ||= []
+        @command_queue
     end
 end
 
@@ -498,10 +503,21 @@ class ScoreboardView
 
     def initialize(filename)
         @template = Erubis::Eruby.new(File.read(filename))
+        galpha = 255
     end
 
     def render
         # override this to implement animations and stuff
+        while command_queue.length > 0
+            cmd = command_queue.shift
+            if (cmd.has_key? 'down')
+                galpha = 0
+            elsif (cmd.has_key? 'up')
+                galpha = 255
+            elsif (cmd.has_key? 'announce_next')
+                announce.next
+            end
+        end
         render_template
     end
 
@@ -510,6 +526,7 @@ class ScoreboardView
     end
 
     attr_accessor :announce, :status, :home_team, :away_team, :clock
+    attr_accessor :command_queue, :galpha
 end
 
 app = ScoreboardApp.new

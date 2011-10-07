@@ -19,7 +19,7 @@
 
 
 "use strict";
-var autocompletePenalties = ["SUCKING"];
+var autocompletePenalties = [];
 var clockState = { };
 var lastStopTimeElapsed = 0;
 
@@ -441,6 +441,18 @@ function viewCommand(cmd) {
     putJson('/view_command', cmd);
 }
 
+function scoreboardUp() {
+    viewCommand({'up':1});
+}
+
+function scoreboardDown() {
+    viewCommand({'down':1});
+}
+
+function nextAnnounce() {
+    viewCommand({'announce_next':1});
+}
+
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
@@ -462,4 +474,7 @@ $(document).ready(function() {
     $("#stopClock").click(stopClock);
     $("#announceControl #announce").click(postAnnounce);
     $("#announceControl #status").click(postStatus);
+    $("#announceControl #nextAnnounce").click(nextAnnounce);
+    $("#transitionControl #up").click(scoreboardUp);
+    $("#transitionControl #down").click(scoreboardDown);
 });

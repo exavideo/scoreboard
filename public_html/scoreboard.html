@@ -52,6 +52,12 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 width: 300px;
             }
 
+            .control {
+                border: 1px dotted blue;
+                padding: 3px;
+                margin: 3px;
+            }
+
             #main {
                 padding: 10px;
             }
@@ -64,18 +70,27 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         <div id="main">
             <!-- global state/control -->
             <div style="float:left">
-                <div id="clockControl">
+                <div id="clockControl" class="control">
+                    Clock <br />
                     <h1 id="clock"></h1>
                     <button id="startClock">Start</button>
                     <button id="stopClock">Stop</button>
                 </div>
-                <div id="announceControl">
+                <div id="announceControl" class="control">
+                    Announce <br />
                     <input type="text" id="textInput" /><br />
                     <button id="announce">Announce</button>
                     <button id="status">Status</button>
                     <button id="clearStatus">Clear Status</button>
+                    <button id="nextAnnounce">Next/Clear Annc</button>
                 </div>
-                <div id="preview"><img src="/preview" /></div>
+                <div id="transitionControl" class="control">
+                    Transition <br />
+                    <button id="up">Up</button>
+                    <button id="down">Down</button>
+                </div>  
+
+                <div id="preview" class="control">Preview <br /><img src="/preview" /></div>
             </div>
 
             <div class="teamControl" id="homeTeamControl"></div>
