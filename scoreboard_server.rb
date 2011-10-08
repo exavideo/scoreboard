@@ -19,7 +19,7 @@
 require 'patchbay'
 require 'json'
 require 'erubis'
-
+require 'thin'
 
 class GameClock
     def initialize
@@ -375,7 +375,6 @@ class ScoreboardApp < Patchbay
 
         if id == 0 or id == 1
             Thread.exclusive { @teams[id].merge!(incoming_json) }
-            p @teams
             render :json => ''
         else
             render :json => '', :status => 404
@@ -422,8 +421,6 @@ class ScoreboardApp < Patchbay
             @announces << incoming_json['message']
         end
 
-        p @announces
-
         render :json => ''
     end
 
@@ -434,7 +431,6 @@ class ScoreboardApp < Patchbay
 
     put '/view_command' do
         command_queue << incoming_json
-        p command_queue
         render :json => ''
     end
 
@@ -536,13 +532,14 @@ end
 
 app = ScoreboardApp.new
 app.view = ScoreboardView.new('andrew_scoreboard.svg.erb')
+Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3001) }
 
 galpha = 255
 
 while true
     # prepare next SVG frame
-    data = Thread.exclusive { app.view.render }
+    data = app.view.render
     # build header with data length and global alpha
     header = [ data.length, galpha ].pack('LC')
 
