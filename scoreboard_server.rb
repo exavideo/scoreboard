@@ -504,7 +504,7 @@ class ScoreboardView
 
     def initialize(filename)
         @template = Erubis::Eruby.new(File.read(filename))
-        galpha = 255
+        self.galpha = 255
     end
 
     def render
@@ -512,9 +512,9 @@ class ScoreboardView
         while command_queue.length > 0
             cmd = command_queue.shift
             if (cmd.has_key? 'down')
-                galpha = 0
+                self.galpha = 0
             elsif (cmd.has_key? 'up')
-                galpha = 255
+                self.galpha = 255
             elsif (cmd.has_key? 'announce_next')
                 announce.next
             end
@@ -535,13 +535,11 @@ app.view = ScoreboardView.new('andrew_scoreboard.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3001) }
 
-galpha = 255
-
 while true
     # prepare next SVG frame
     data = app.view.render
     # build header with data length and global alpha
-    header = [ data.length, galpha ].pack('LC')
+    header = [ data.length, app.view.galpha ].pack('LC')
 
     # wait for handshake byte from other end
     if STDIN.read(1).nil?
