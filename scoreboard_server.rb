@@ -54,6 +54,28 @@ class GameClock
         end
     end
 
+    def period_advance
+        if time_elapsed == @period_end
+            @period += 1
+        end
+    end
+
+    def reset_time(elapsed, newperiod)
+        if newperiod <= 3
+            # normal period
+            @value = (20*60*10) - elapsed + 20*60*10*(newperiod-1)
+            @period_end = 20*60*10*(newperiod)
+        else
+            # overtime
+            @value = (5*60*10)*(period-3) - elapsed + 20*60*10*3
+            @period_end = 20*60*10*3 + (5*60*10)*(newperiod-3)
+        end
+        if @last_start != nil
+            @last_start = Time.now
+        end
+        @period = newperiod
+    end
+
     attr_reader :period
 
     def start
@@ -67,7 +89,9 @@ class GameClock
             end
         end
 
-        @last_start = Time.now 
+        if @last_start == nil
+           @last_start = Time.now 
+        end
     end
 
     def stop
@@ -390,8 +414,21 @@ class ScoreboardApp < Patchbay
         end
     end
 
-    put '/clock/period_remaining' do
-        @clock.period_remaining = incoming_json
+    put '/clock' do
+        time_str = incoming_json['time_str']
+        period = incoming_json['period'].to_i
+        if time_str =~ /(\d+):(\d+)/
+            time = ($1.to_i) * 600 + ($2.to_i) * 10
+        elsif time_str =~ /(\d+):(\d+)\.(\d+)/
+            time = ($1.to_i) * 600 + ($2.to_i) * 10 + ($3.to_i)
+        elsif time_str =~ /(\d+).(\d+)/
+            time = ($1.to_i) * 10 + ($2.to_i)
+        else
+            STDERR.puts "bad request??"
+            render :json => ''
+            return
+        end
+        @clock.reset_time(time, period)
         render :json => ''
     end
 

@@ -453,6 +453,10 @@ function nextAnnounce() {
     viewCommand({'announce_next':1});
 }
 
+function setClock() {
+    putJson('/clock', $("#clockSet").serializeInputsJson());
+}
+
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
@@ -477,4 +481,5 @@ $(document).ready(function() {
     $("#announceControl #nextAnnounce").click(nextAnnounce);
     $("#transitionControl #up").click(scoreboardUp);
     $("#transitionControl #down").click(scoreboardDown);
+    $("#setClock").click(setClock);
 });

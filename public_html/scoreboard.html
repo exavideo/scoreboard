@@ -73,8 +73,19 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 <div id="clockControl" class="control">
                     Clock <br />
                     <h1 id="clock"></h1>
-                    <button id="startClock">Start</button>
-                    <button id="stopClock">Stop</button>
+                    <p>
+                        <button id="startClock">Start</button>
+                        <button id="stopClock">Stop</button>
+                        <button id="periodAdvance">Period Advance</button>
+                    </p>
+                    <p id="clockSet">
+                        Time Remaining
+                        <input id="time_str" width="10" type="text" />
+                        Period
+                        <input id="period" width="2" type="text" />
+                        <button id="setClock" type="text">Set Clock</button>
+                    </p>
+                    
                 </div>
                 <div id="announceControl" class="control">
                     Announce <br />
