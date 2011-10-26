@@ -20,6 +20,7 @@ require 'patchbay'
 require 'json'
 require 'erubis'
 require 'thin'
+require 'serialport'
 
 class GameClock
     def initialize
@@ -490,6 +491,8 @@ class ScoreboardApp < Patchbay
 
     self.files_dir = 'public_html'
 
+    attr_accessor :clock
+
 protected
     def incoming_json
         unless params[:incoming_json]
@@ -690,6 +693,21 @@ app = ScoreboardApp.new
 app.view = ScoreboardView.new('andrew_scoreboard2.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3001) }
+
+# 2b = run, d4 = stop
+
+Thread.new do
+    sp = SerialPort.new('/dev/ttyUSB0', 2400)
+    while true
+        byte = sp.read(1).ord
+
+        if byte == 0x2b
+            app.clock.start
+        elsif byte == 0xd4
+            app.clock.stop
+        end
+    end
+end
 
 dirty_level = 1
 
