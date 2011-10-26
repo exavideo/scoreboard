@@ -424,7 +424,6 @@ class ScoreboardApp < Patchbay
         elsif time_str =~ /(\d+).(\d+)/
             time = ($1.to_i) * 10 + ($2.to_i)
         else
-            STDERR.puts "bad request??"
             render :json => ''
             return
         end
@@ -536,26 +535,130 @@ module ViewHelpers
     include TimeHelpers
 end
 
+class LinearAnimation
+    IN = 0
+    OUT = 1
+    def initialize
+        @value = 0
+        @total_frames = 0
+        @frame = 0
+        @direction = IN
+        @transition_done_block = nil
+    end
+
+    def frame_advance
+        if @total_frames > 0
+            @frame += 1
+            if @direction == IN
+                @value = @frame.to_f / @total_frames.to_f
+            else
+                @value = 1.0 - (@frame.to_f / @total_frames.to_f)
+            end
+
+            if @frame == @total_frames
+                @frame = 0
+                @total_frames = 0
+
+                if @transition_done_block
+                    # copy to temporary in case the block calls in or out
+                    the_block = @transition_done_block
+                    @transition_done_block = nil
+                    the_block.call
+                end
+            end
+        end
+    end
+
+    def in(frames)
+        @frame = 0
+        @total_frames = frames
+        @direction = IN
+
+        if block_given?
+            @transition_done_block = Proc.new { yield }
+        end
+    end
+
+    def out(frames)
+        @frame = 0
+        @total_frames = frames
+        @direction = OUT
+
+        if block_given?
+            @transition_done_block = Proc.new { yield }
+        end
+    end
+
+    def cut_in
+        @value = 1.0
+    end
+
+    def cut_out
+        @value = 0.0
+    end
+
+    attr_reader :value
+end
+
 class ScoreboardView
     include ViewHelpers
 
     def initialize(filename)
-        @template = Erubis::Eruby.new(File.read(filename))
-        self.galpha = 255
+        @template = Erubis::PI::Eruby.new(File.read(filename))
+
+        @home_goal_flasher = LinearAnimation.new
+        @away_goal_flasher = LinearAnimation.new
+        @announce_text_dissolve = LinearAnimation.new
+        @global_dissolve = LinearAnimation.new
+
+        @announce_text_dissolve.cut_in
+
+        @animations = [ @home_goal_flasher, @away_goal_flasher, 
+            @announce_text_dissolve, @global_dissolve ]
+    end
+
+    def goal_flash(flasher)
+        n_frames = 15
+        
+        # chain together a bunch of transitions
+        flasher.in(n_frames) { 
+            flasher.out(n_frames) {
+                flasher.in(n_frames) {
+                    flasher.out(n_frames) {
+                        flasher.in(n_frames) {
+                            flasher.out(n_frames) 
+                        }
+                    }
+                }
+            }
+        }
     end
 
     def render
-        # override this to implement animations and stuff
         while command_queue.length > 0
             cmd = command_queue.shift
             if (cmd.has_key? 'down')
-                self.galpha = 0
+                @global_dissolve.out(15)
             elsif (cmd.has_key? 'up')
-                self.galpha = 255
+                @global_dissolve.in(15)
             elsif (cmd.has_key? 'announce_next')
-                announce.next
+                @announce_text_dissolve.out(10) {
+                    announce.next
+                    @announce_text_dissolve.in(10)
+                }
+            elsif (cmd.has_key? 'goal_scored_by')
+                if cmd['goal_scored_by'] =~ /\/0$/
+                    goal_flash(@home_goal_flasher)
+                elsif cmd['goal_scored_by'] =~ /\/1$/
+                    goal_flash(@away_goal_flasher)
+                end
             end
         end
+
+        @animations.each do |ani|
+            ani.frame_advance
+        end
+
         render_template
     end
 
@@ -563,12 +666,28 @@ class ScoreboardView
         @template.result(binding)
     end
 
+    def galpha
+        (255 * @global_dissolve.value).to_i
+    end
+
+    def announce_text_opacity
+        @announce_text_dissolve.value
+    end
+
+    def home_blink_opacity
+        @home_goal_flasher.value
+    end
+
+    def away_blink_opacity
+        @away_goal_flasher.value
+    end
+
     attr_accessor :announce, :status, :home_team, :away_team, :clock
-    attr_accessor :command_queue, :galpha
+    attr_accessor :command_queue
 end
 
 app = ScoreboardApp.new
-app.view = ScoreboardView.new('andrew_scoreboard.svg.erb')
+app.view = ScoreboardView.new('andrew_scoreboard2.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3001) }
 
