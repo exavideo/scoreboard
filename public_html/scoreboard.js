@@ -235,6 +235,9 @@ jQuery.fn.queuePenalty = function(penalty_div) {
 
     // find which queue has the shortest length
     penaltyQueues.each(function(i, q) {
+        // flush expired penalties from queue
+        $(q).penaltyQueueFlush( );
+
         var qend = $(q).penaltyQueueEnd();
         if (qend < min_queue_end || min_queue_end == -1) {
             min_queue_end = qend;
@@ -251,6 +254,19 @@ jQuery.fn.queuePenalty = function(penalty_div) {
     }
 
     $(queue).find(".penalty_list").append(penalty_div);
+}
+
+jQuery.fn.penaltyQueueFlush = function( ) {
+    var penalty_end = intOrZero($(this).find("#start").val());
+    $(this).find(".penaltyData").each(function(i, p) {
+        penalty_end = penalty_end + $(p).penaltyLength();
+        if (penalty_end < clockState.time_elapsed) {
+            // delete this expired penalty
+            $(p).remove();
+            // adjust queue start
+            $(this).find("#start").val(penalty_end);
+        }
+    });
 }
 
 jQuery.fn.serializePenaltiesJson = function() {
