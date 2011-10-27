@@ -473,9 +473,28 @@ function setClock() {
     putJson('/clock', $("#clockSet").serializeInputsJson());
 }
 
+function changeAutosync() {
+    if ($("#autoSync").is(':checked')) {
+        putJson('/autosync', { 'enabled' : true });
+    } else {
+        putJson('/autosync', { 'enabled' : false });
+    }
+}
+
+function getAutosync() {
+    getJson('/autosync', function(data) {
+        if (data.enabled) {
+            $("#autoSync").prop('checked',true);
+        } else {
+            $("#autoSync").prop('checked',false);
+        }
+    });
+}
+
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
+    getAutosync( );
 
     $(".teamControl").buildTeamControl();
     // set up team URLs and load initial data
@@ -498,4 +517,5 @@ $(document).ready(function() {
     $("#transitionControl #up").click(scoreboardUp);
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
+    $("#autoSync").change(changeAutosync);
 });

@@ -336,6 +336,7 @@ class ScoreboardApp < Patchbay
         @teams = load_team_config
         @announces = []
         @status = ''
+        @autosync_enabled = false
     end
 
     attr_reader :status
@@ -451,6 +452,20 @@ class ScoreboardApp < Patchbay
         }.to_json
     end
 
+    get '/autosync' do
+        render :json => {
+            'enabled' => @autosync_enabled
+        }
+    end
+
+    put '/autosync' do
+        if incoming_json['enabled']
+            @autosync_enabled = true
+        else
+            @autosync_enabled = false
+        end
+    end
+
     post '/announce' do
         if incoming_json.has_key? 'messages'
             @announces.concat(incoming_json['messages'])
@@ -491,7 +506,7 @@ class ScoreboardApp < Patchbay
 
     self.files_dir = 'public_html'
 
-    attr_accessor :clock
+    attr_reader :clock, :autosync_enabled
 
 protected
     def incoming_json
@@ -701,10 +716,12 @@ Thread.new do
     while true
         byte = sp.read(1).ord
 
-        if byte == 0x2b
-            app.clock.start
-        elsif byte == 0xd4
-            app.clock.stop
+        if app.autosync_enabled
+            if byte == 0x2b
+                app.clock.start
+            elsif byte == 0xd4
+                app.clock.stop
+            end
         end
     end
 end
