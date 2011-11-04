@@ -61,6 +61,10 @@ class GameClock
         end
     end
 
+    def reset_period_remaining(tenths)
+        @value = @period_end - tenths
+    end
+
     def reset_time(elapsed, newperiod)
         if newperiod <= 3
             # normal period
@@ -707,22 +711,43 @@ end
 app = ScoreboardApp.new
 app.view = ScoreboardView.new('andrew_scoreboard2.svg.erb')
 Thin::Logging.silent = true
-Thread.new { app.run(:Host => '::', :Port => 3001) }
+Thread.new { app.run(:Host => '::', :Port => 3002) }
 
 # 2b = run, d4 = stop
 
 Thread.new do
-    sp = SerialPort.new('/dev/ttyUSB0', 2400)
-    while true
-        byte = sp.read(1).ord
+    begin
+        sp = SerialPort.new('/dev/ttyUSB0', 19200)
+        string = ''
+        last_control = -1
+        while true
+            byte = sp.read(1)
 
-        if app.autosync_enabled
-            if byte == 0x2b
-                app.clock.start
-            elsif byte == 0xd4
-                app.clock.stop
+            if byte.ord < 0x10
+                # parse (string, last_control)
+                if last_control == 2
+                    tenths = -1
+
+                    if (string =~ /^(\d\d)\.(\d)/)
+                        tenths = $1.to_i * 10 + $2.to_i
+                    elsif (string =~ /^(\s\d|\d\d):(\d\d)[^:]/)
+                        tenths = $1.to_i * 600 + $2.to_i * 10
+                    end
+
+                    STDERR.puts "tenths: #{tenths}"
+
+                    if tenths > 0 and app.autosync_enabled
+                        app.clock.reset_period_remaining(tenths)
+                    end
+                end
+                last_control = byte.ord
+                string = ''
+            else
+                string << byte
             end
         end
+    rescue Exception => e
+        p e
     end
 end
 
