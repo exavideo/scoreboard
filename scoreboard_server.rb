@@ -736,7 +736,7 @@ Thread.new do
 
                     STDERR.puts "tenths: #{tenths}"
 
-                    if tenths > 0 and app.autosync_enabled
+                    if tenths >= 0 and app.autosync_enabled
                         app.clock.reset_period_remaining(tenths)
                     end
                 end
