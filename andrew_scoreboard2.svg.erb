@@ -171,9 +171,11 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         ].reject { |x| x == 0 }.min)
 
         if bigger == 5 and smaller == 4
-            message = "POWER PLAY #{time_to_change}"
+            message = "POWER PLAY  #{time_to_change}"
+        elsif bigger == 5 and smaller == 3
+            message = "2-MAN ADV  #{time_to_change}"
         else
-            message = "#{bigger}-ON-#{smaller} #{time_to_change}"
+            message = "#{bigger}-ON-#{smaller}  #{time_to_change}"
         end
 ?>    <g
        id="powerPlayClock">
@@ -230,19 +232,19 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 <?rb end ?>    
 
 <?rb
-    if home_team.strength > away_team.strength
-        htbg = '#ffff00'
-        htfg = '#000000'
+    if away_team.strength > home_team.strength
+        atbg = '#ffff00'
+        atfg = '#000000'
     else
-        htbg = home_team.bgcolor
-        htfg = home_team.fgcolor
+        atbg = away_team.bgcolor
+        atfg = away_team.fgcolor
     end
 ?>
-    <g id="homeTeam">
+    <g id="awayTeam">
       <path
          d="m 208,597.36218 -22.5,45 95,0 22.5,-45 z"
-         id="homeTeamBkgd"
-         style="fill:@{ htbg }@;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+         id="awayTeamBkgd"
+         style="fill:@{ atbg }@;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <path
          d="m 208,597.36218 -22.5,45 95,0 22.5,-45 z"
          id="path5662"
@@ -259,17 +261,17 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
          style="font-size:10px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
            x="244.30907"
            y="628.26221"
-           id="homeTeamNameText"
-           style="font-size:24px;fill:@{ htfg }@">@{ home_team.name }@</tspan></text>
+           id="awayTeamNameText"
+           style="font-size:24px;fill:@{ atfg }@">@{ away_team.name }@</tspan></text>
     </g>
     <g
-       id="awayScore">
+       id="homeScore">
       <path
          d="m 285.5,652.36218 -22.5,45 45,0 22.5,-45 z"
          id="path2999"
          style="fill:#1a1a1a;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <path
-         opacity="@{ away_blink_opacity }@"
+         opacity="@{ home_blink_opacity }@"
          d="m 285.5,652.36218 -22.5,45 45,0 22.5,-45 z"
          id="path2999"
          style="fill:#ff0000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
@@ -282,30 +284,30 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
          id="path5752"
          style="fill:url(#g2);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <text
-         x="296.75534"
-         y="687.46216"
+         x="297.75534"
+         y="688.46216"
          id="text3065"
          xml:space="preserve"
          style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
-           x="296.75534"
-           y="687.46216"
-           id="awayScoreText">@{ away_team.score }@</tspan></text>
+           x="297.75534"
+           y="688.46216"
+           id="homeScoreText">@{ home_team.score }@</tspan></text>
     </g>
 <?rb
-    if away_team.strength > home_team.strength
-        atbg = '#ffff00'
-        atfg = '#000000'
+    if home_team.strength > away_team.strength
+        htbg = '#ffff00'
+        htfg = '#000000'
     else
-        atbg = away_team.bgcolor
-        atfg = away_team.fgcolor
+        htbg = home_team.bgcolor
+        htfg = home_team.fgcolor
     end
 ?>
     <g
-       id="awayTeam">
+       id="homeTeam">
       <path
          d="m 180.5,652.36218 -22.5,45 95,0 22.5,-45 z"
          id="path2993"
-         style="fill:@{ atbg }@;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+         style="fill:@{ htbg }@;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <path
          d="m 180.5,652.36218 -22.5,45 95,0 22.5,-45 z"
          id="path5680"
@@ -319,11 +321,11 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
          y="683.26221"
          id="text3053"
          xml:space="preserve"
-         style="font-size:10px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:@{ atfg }@;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
+         style="font-size:10px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:@{ htfg }@;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
            x="216.86513"
            y="683.26221"
-           id="awayTeamNameText"
-           style="font-size:24px">@{ away_team.name }@</tspan></text>
+           id="homeTeamNameText"
+           style="font-size:24px">@{ home_team.name }@</tspan></text>
     </g>
     <g
        id="period"
@@ -345,13 +347,13 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
          inkscape:connector-curvature="0" />
       <text
          x="140.26334"
-         y="742.55219"
+         y="743.08619"
          id="text3073"
          xml:space="preserve"
          style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#f9f9f9;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"
          sodipodi:linespacing="125%"><tspan
            x="140.26334"
-           y="742.55219"
+           y="743.08619"
            id="periodText">@{ clock.period }@</tspan></text>
     </g>
     <g
@@ -373,25 +375,25 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
          inkscape:connector-curvature="0" />
       <text
          x="72.284309"
-         y="740.08618"
+         y="743.08619"
          id="text3069"
          xml:space="preserve"
-         style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"
          sodipodi:linespacing="125%"><tspan
            x="72.284309"
-           y="743.08618"
+           y="743.08619"
            id="clockText"
            style="font-size:36px;fill:#ffffff">@{ clock.time }@</tspan></text>
     </g>
     <g
-       id="g6025">
+       id="awayScore">
       <path
          d="m 313,597.36218 -22.5,45 45,0 22.5,-45 z"
          id="path2997"
          style="fill:#1a1a1a;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <path
          d="m 313,597.36218 -22.5,45 45,0 22.5,-45 z"
-         opacity="@{ home_blink_opacity }@"
+         opacity="@{ away_blink_opacity }@"
          id="path2997"
          style="fill:#ff0000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <path
@@ -403,14 +405,14 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
          id="path6023"
          style="fill:url(#g2);stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <text
-         x="325.26334"
-         y="632.55219"
+         x="325.76334"
+         y="633.05219"
          id="text3061"
          xml:space="preserve"
          style="font-size:36px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Gotham FWN Narrow;-inkscape-font-specification:Gotham FWN Narrow Bold"><tspan
-           x="325.26334"
-           y="632.55219"
-           id="tspan3063">@{ home_team.score }@</tspan></text>
+           x="325.76334"
+           y="633.05219"
+           id="tspan3063">@{ away_team.score }@</tspan></text>
     </g>
   </g>
 </svg>

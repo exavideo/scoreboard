@@ -56,9 +56,13 @@ class GameClock
     end
 
     def period_advance
-        if time_elapsed == @period_end
-            @period += 1
+        pl = @period_length
+        if @period+1 > 3
+            pl = @overtime_length
         end
+        #if time_elapsed == @period_end
+            reset_time(pl, @period+1)
+        #end
     end
 
     def reset_period_remaining(tenths)
@@ -72,7 +76,7 @@ class GameClock
             @period_end = 20*60*10*(newperiod)
         else
             # overtime
-            @value = (5*60*10)*(period-3) - elapsed + 20*60*10*3
+            @value = (5*60*10)*(newperiod-3) - elapsed + 20*60*10*3
             @period_end = 20*60*10*3 + (5*60*10)*(newperiod-3)
         end
         if @last_start != nil
@@ -332,6 +336,29 @@ class ClockHelper
     end
 end
 
+def parse_clock(time_str)
+	frac = 0
+	if time_str =~ /(.*)\.(\d+)/
+		frac = (("0." + $2).to_f * 1000).to_i
+		time_str = $1
+	end
+
+	whole = -1
+	if time_str =~ /(\d+):(\d+)/
+		whole = ($1.to_i) * 60 + ($2.to_i)
+	elsif time_str =~ /(\d+)/
+		whole = ($1.to_i)
+		whole = (whole / 100) * 60 + (whole % 100)
+	end
+    #time = whole * 1000 + frac
+    time = (whole * 1000 + frac) / 100
+
+    if time < 0
+        return nil
+    end
+    return time
+end
+
 class ScoreboardApp < Patchbay
     def initialize
         super
@@ -350,10 +377,10 @@ class ScoreboardApp < Patchbay
         [
             {
                 # Team name
-                'name' => 'RPI',
+                'name' => 'UNION',
                 # color value to be used for team name display.
                 'fgcolor' => '#ffffff',
-                'bgcolor' => '#D40000',
+                'bgcolor' => '#800000',
                 # number of points scored by this team
                 'score' => 0,
 
@@ -362,7 +389,7 @@ class ScoreboardApp < Patchbay
 
                 # number 
                 # timeouts "left" don't include the one currently in use, if any
-                'timeoutsLeft' => 3,
+                'timeoutsLeft' => 1,
                 'timeoutNowInUse' => false,
 
                 # penalty queues (for hockey)
@@ -382,12 +409,12 @@ class ScoreboardApp < Patchbay
                 ]
             },
             {
-                'name' => 'UNION',
+                'name' => 'RPI',
                 'fgcolor' => '#ffffff',
-                'bgcolor' => '#800000',
+                'bgcolor' => '#d40000',
                 'score' => 0,
                 'shotsOnGoal' => 0,
-                'timeoutsLeft' => 3,
+                'timeoutsLeft' => 1,
                 'timeoutNowInUse' => false,
                 'penalties' => {
                     'announcedQueue' => [],
@@ -423,17 +450,10 @@ class ScoreboardApp < Patchbay
     put '/clock' do
         time_str = incoming_json['time_str']
         period = incoming_json['period'].to_i
-        if time_str =~ /(\d+):(\d+)/
-            time = ($1.to_i) * 600 + ($2.to_i) * 10
-        elsif time_str =~ /(\d+):(\d+)\.(\d+)/
-            time = ($1.to_i) * 600 + ($2.to_i) * 10 + ($3.to_i)
-        elsif time_str =~ /(\d+).(\d+)/
-            time = ($1.to_i) * 10 + ($2.to_i)
-        else
-            render :json => ''
-            return
+        time = parse_clock(time_str)
+        if (time)
+            @clock.reset_time(time, period)
         end
-        @clock.reset_time(time, period)
         render :json => ''
     end
 
@@ -443,6 +463,31 @@ class ScoreboardApp < Patchbay
         else
             @clock.stop
         end
+
+        render :json => ''
+    end
+
+    put '/clock/toggle' do
+        if @clock.running?
+            @clock.stop
+        else
+            @clock.start
+        end
+
+        render :json => ''
+    end
+
+    put '/clock/adjust' do
+        time_offset = incoming_json['time'].to_i / 100
+        time = @clock.period_remaining + time_offset;
+        time = 0 if time < 0
+        @clock.period_remaining = time
+
+        render :json => ''
+    end
+
+    put '/clock/advance' do
+        @clock.period_advance
 
         render :json => ''
     end
@@ -498,8 +543,8 @@ class ScoreboardApp < Patchbay
         @view = view
         @view.announce = AnnounceHelper.new(@announces)
         @view.status = StatusHelper.new(@status)
-        @view.home_team = TeamHelper.new(@teams[0], @clock)
-        @view.away_team = TeamHelper.new(@teams[1], @clock)
+        @view.away_team = TeamHelper.new(@teams[0], @clock)
+        @view.home_team = TeamHelper.new(@teams[1], @clock)
         @view.clock = ClockHelper.new(@clock)
         @view.command_queue = command_queue
     end
@@ -628,14 +673,14 @@ class ScoreboardView
     def initialize(filename)
         @template = Erubis::PI::Eruby.new(File.read(filename))
 
-        @home_goal_flasher = LinearAnimation.new
         @away_goal_flasher = LinearAnimation.new
+        @home_goal_flasher = LinearAnimation.new
         @announce_text_dissolve = LinearAnimation.new
         @global_dissolve = LinearAnimation.new
 
         @announce_text_dissolve.cut_in
 
-        @animations = [ @home_goal_flasher, @away_goal_flasher, 
+        @animations = [ @away_goal_flasher, @home_goal_flasher, 
             @announce_text_dissolve, @global_dissolve ]
     end
 
@@ -696,15 +741,15 @@ class ScoreboardView
         @announce_text_dissolve.value
     end
 
-    def home_blink_opacity
-        @home_goal_flasher.value
-    end
-
     def away_blink_opacity
         @away_goal_flasher.value
     end
 
-    attr_accessor :announce, :status, :home_team, :away_team, :clock
+    def home_blink_opacity
+        @home_goal_flasher.value
+    end
+
+    attr_accessor :announce, :status, :away_team, :home_team, :clock
     attr_accessor :command_queue
 end
 

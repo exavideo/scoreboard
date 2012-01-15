@@ -121,6 +121,7 @@ function updateClock( ) {
         var isRunning = data.running;
 
         var clockField = $("#clockControl").find("#clock");
+        var periodField = $("#clockControl").find("#period");
 
         if (isRunning) {
             clockField.addClass("clock_running");
@@ -130,7 +131,8 @@ function updateClock( ) {
             clockField.removeClass("clock_running");
         }
 
-        clockField.text(formatTime(tenthsRemaining) + " " + period);
+        clockField.text(formatTime(tenthsRemaining));
+        periodField.text(period);
     });
 }
 
@@ -158,6 +160,7 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#minorPenalty").click(function() { newPenalty.call(this, 1200); });
         $(elem).find("#majorPenalty").click(function() { newPenalty.call(this, 3000); });
         $(elem).find("#clearPenalties").click(clearPenalties);
+        $(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
         $(elem).find("#editPenalties").click(editPenalties);
 
         $(elem).find("input,select").change(function() { $(this).team().putTeamData() });
@@ -208,6 +211,8 @@ jQuery.fn.newPenaltyDiv = function() {
         source: autocompletePenalties,
         change: $(this).change()
     });
+    penaltyDiv.find("#deletePenalty").click(deleteSinglePenalty);
+
     return penaltyDiv;
 }
 
@@ -382,6 +387,13 @@ function penaltyQueueStartLastStop() {
     $(this).penaltyQueue().find("#start").val(lastStopTimeElapsed);
 }
 
+function deleteSinglePenalty() {
+    var pd = $(this).parents(".penaltyData");
+    var tc = pd.team();
+    pd.remove();
+    tc.putTeamData();
+}
+
 // goalScored
 // Stop clock and register a goal for the team.
 function goalScored() {
@@ -473,6 +485,18 @@ function setClock() {
     putJson('/clock', $("#clockSet").serializeInputsJson());
 }
 
+function toggleClock() {
+	putJson('/clock/toggle', {});
+}
+
+function adjustClock(time) {
+    putJson('/clock/adjust', { 'time' : time });
+}
+
+function periodAdvance(dummy) {
+    putJson('/clock/advance', {});
+}
+
 function changeAutosync() {
     if ($("#autoSync").is(':checked')) {
         putJson('/autosync', { 'enabled' : true });
@@ -498,10 +522,10 @@ $(document).ready(function() {
 
     $(".teamControl").buildTeamControl();
     // set up team URLs and load initial data
-    $("#homeTeamControl").data('url','/team/0');
-    $("#homeTeamControl").getTeamData();
-    $("#awayTeamControl").data('url','/team/1');
+    $("#awayTeamControl").data('url','/team/0');
     $("#awayTeamControl").getTeamData();
+    $("#homeTeamControl").data('url','/team/1');
+    $("#homeTeamControl").getTeamData();
 
     $(".dialog").dialog({
         autoOpen: false,
@@ -511,6 +535,12 @@ $(document).ready(function() {
 
     $("#startClock").click(startClock);
     $("#stopClock").click(stopClock);
+	$("#toggleClock").click(toggleClock);
+    $("#upSec").click( function() { adjustClock.call(this, 1000); } );
+    $("#dnSec").click( function() { adjustClock.call(this, -1000); } );
+    $("#upTenth").click( function() { adjustClock.call(this, 100); } );
+    $("#dnTenth").click( function() { adjustClock.call(this, -100); } );
+    $("#periodAdvance").click(periodAdvance);
     $("#announceControl #announce").click(postAnnounce);
     $("#announceControl #status").click(postStatus);
     $("#announceControl #nextAnnounce").click(nextAnnounce);
