@@ -450,6 +450,7 @@ class ScoreboardApp < Patchbay
     put '/clock' do
         time_str = incoming_json['time_str']
         period = incoming_json['period'].to_i
+        period = @clock.period if period <= 0
         time = parse_clock(time_str)
         if (time)
             @clock.reset_time(time, period)
@@ -481,7 +482,7 @@ class ScoreboardApp < Patchbay
         time_offset = incoming_json['time'].to_i / 100
         time = @clock.period_remaining + time_offset;
         time = 0 if time < 0
-        @clock.period_remaining = time
+        @clock.reset_time(time, @clock.period)
 
         render :json => ''
     end
@@ -575,8 +576,18 @@ protected
 end
 
 module TimeHelpers
+    # truncate tenths
     def format_time_without_tenths(time)
         seconds = time / 10
+        minutes = seconds / 60
+        seconds = seconds % 60
+
+        format "%d:%02d", minutes, seconds
+    end
+
+    # round up to next second
+    def format_time_without_tenths_round(time)
+        seconds = (time + 9) / 10
         minutes = seconds / 60
         seconds = seconds % 60
 

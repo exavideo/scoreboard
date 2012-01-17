@@ -165,7 +165,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 <?rb if home_team.strength < 5 or away_team.strength < 5           
         smaller, bigger = [home_team.strength, away_team.strength].minmax
 
-        time_to_change = format_time_without_tenths([
+        time_to_change = format_time_without_tenths_round([
             home_team.penalties.time_to_strength_change, 
             away_team.penalties.time_to_strength_change
         ].reject { |x| x == 0 }.min)
@@ -177,12 +177,14 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         else
             message = "#{bigger}-ON-#{smaller}  #{time_to_change}"
         end
+        ppbg = "#ffff00"
+        ppbg = "#dddddd" if bigger == smaller
 ?>    <g
        id="powerPlayClock">
       <path
          d="m 83,587.36218 15,-30 280,0 -15,30 z"
          id="path2989"
-         style="fill:#ffff00;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+         style="fill:@{ ppbg }@;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <path
          d="m 83,587.36218 15,-30 280,0 -15,30 z"
          id="path5144"
@@ -202,12 +204,12 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                id="announceText"
                style="font-size:22px">@{ message }@</tspan></text>
     </g>
-<?rb end ?><?rb if announce.is_up ?>    <g
-       id="announce">
+<?rb end ?><?rb if announce.is_up ?>
+    <g id="announce">
       <path
          d="m 83,587.36218 15,-30 280,0 -15,30 z"
          id="path4049"
-         style="fill:#ffff00;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+         style="fill:#dddddd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <path
          d="m 83,587.36218 15,-30 280,0 -15,30 z"
          id="path4051"
