@@ -49,7 +49,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
             .teamControl {
                 float: left;
-                width: 300px;
+                width: 18em;
             }
 
             .control {
@@ -71,19 +71,39 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             <!-- global state/control -->
             <div style="float:left">
                 <div id="clockControl" class="control">
-                    Clock <br />
-                    <h1 id="clock"></h1>
+		                <table>
+							<tr><td colspan="3" rowspan="2" style="font-size: 36pt; font-weight:bold; text-align:right;" id="clock"></td>
+							<td style="text-align:right;">Period</td></tr>
+							<tr>
+							<td style="font-size: 24pt; font-weight:bold; text-align:right;" id="period"></td></tr>
+		                    <tr><td rowspan="2">
+							<button id="toggleClock" style="height:50px">Start/Stop</button>
+							</td><td>
+		                    <button id="startClock">Start</button>
+		                    </td><td>
+		                    <button id="upSec">+1 sec</button>
+		                    </td><td>
+		                    <button id="upTenth">+1/10 sec</button>
+		                    </td></tr>
+		                    <tr><td>
+		                    <button id="stopClock">Stop</button>
+		                    </td><td>
+		                    <button id="dnSec">&minus;1 sec</button>
+		                    </td><td>
+		                    <button id="dnTenth">&minus;1/10 sec</button>
+		                    </td></tr>
+                        </table>
                     <p>
-                        <button id="startClock">Start</button>
+<!--                    <button id="startClock">Start</button>
                         <button id="stopClock">Stop</button>
-                        <button id="periodAdvance">Period Advance</button>
-                        <input type="checkbox" id="autoSync" /> Enable Auto-Sync
+-->                     <button id="periodAdvance">Period Advance</button>
+                        <input type="checkbox" id="autoSync"> Enable Auto-Sync</input>
                     </p>
                     <p id="clockSet">
                         Time Remaining
-                        <input id="time_str" width="10" type="text" />
+                        <input id="time_str" type="text" style="width:8em" />
                         Period
-                        <input id="period" width="2" type="text" />
+                        <input id="period" type="text" style="width:3em" />
                         <button id="setClock" type="text">Set Clock</button>
                     </p>
                     
@@ -100,14 +120,16 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                     Transition <br />
                     <button id="up">Up</button>
                     <button id="down">Down</button>
+					<span id="debugField"></span>
                 </div>  
 
-                <div id="preview" class="control">Preview <br /><img src="/preview" /></div>
+                
             </div>
 
-            <div class="teamControl" id="homeTeamControl"></div>
             <div class="teamControl" id="awayTeamControl"></div>
+            <div class="teamControl" id="homeTeamControl"></div>
             <div style="clear:left"></div>
+            <div id="preview" class="control" style="width:600px; height:400px">Preview <br /><img src="/preview" /></div>
         </div>
 
         <div style="display: none" id="teamProto">
@@ -125,7 +147,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
             <button id="lockControl">Lock Controls</button>
             <button id="unlockControl">Unlock Controls</button>
-            <button id="goal">Goal</button>
+<!--            <button id="goal">Goal</button> -->
             <button id="minorPenalty">Minor Penalty</button>
             <button id="majorPenalty">Major Penalty</button>
             <button id="clearPenalties">Clear Penalties</button>
@@ -158,9 +180,9 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                                     <option id="time_6000" value="6000">Misconduct (10:00)</option>
                                 </select>
                             </td></tr>
-
-                            <button id="announcePenalty">Announce</button>
                         </table>
+                        <button id="announcePenalty">Announce</button>
+                        <button id="deletePenalty">Delete</button>
                     </li>
                 </ul>
 
