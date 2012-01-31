@@ -159,6 +159,7 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#majorPenalty").click(function() { newPenalty.call(this, 3000); });
         $(elem).find("#clearPenalties").click(clearPenalties);
         $(elem).find("#editPenalties").click(editPenalties);
+        $(elem).find("#emptyNet").click(emptyNet);
 
         $(elem).find("input,select").change(function() { $(this).team().putTeamData() });
 
@@ -208,6 +209,9 @@ jQuery.fn.newPenaltyDiv = function() {
         source: autocompletePenalties,
         change: $(this).change()
     });
+    penaltyDiv.find("#announcePenalty").click(function() { 
+        penaltyDiv.announcePenalty( );     
+    });
     return penaltyDiv;
 }
 
@@ -221,6 +225,9 @@ function newPenalty(time) {
 
     // add to the shorter of the two penalty queues
     $(this).team().queuePenalty(penaltyDiv);
+
+    // clear out any delayed penalty
+    $(this).team().find('#delayedPenalty').removeAttr('checked');
 
     // sync team data
     $(this).team().putTeamData();
@@ -257,14 +264,17 @@ jQuery.fn.queuePenalty = function(penalty_div) {
 }
 
 jQuery.fn.penaltyQueueFlush = function( ) {
-    var penalty_end = intOrZero($(this).find("#start").val());
+    var penalty_end = $(this).find("#start").timeval();
     $(this).find(".penaltyData").each(function(i, p) {
         penalty_end = penalty_end + $(p).penaltyLength();
+        console.log("penalty_end=" + penalty_end);
+        console.log("time elapsed="+clockState.time_elapsed);
         if (penalty_end < clockState.time_elapsed) {
+            console.log("flushing penalty??");
             // delete this expired penalty
             $(p).remove();
             // adjust queue start
-            $(this).find("#start").val(penalty_end);
+            $(this).find("#start").timeval(penalty_end);
         }
     });
 }
@@ -273,7 +283,7 @@ jQuery.fn.serializePenaltiesJson = function() {
     var json = { }
     json.activeQueueStarts = $(this).find(".penalty_queue").map(
         function(i,e) {
-            return [$(e).find("#start").val()];
+            return [$(e).find("#start").timeval()];
         }
     ).get();
     json.activeQueues = $(this).find(".penalty_queue").map(
@@ -286,17 +296,26 @@ jQuery.fn.serializePenaltiesJson = function() {
 }
 
 jQuery.fn.serializePenaltyListJson = function() {
-    var json = $(this).find(".penaltyData").map(function(i,e) {
+    var json = this.find(".penaltyData").map(function(i,e) {
         return [$(e).serializeInputsJson()];
     }).get();
 
     return json;
 }
 
+jQuery.fn.announcePenalty = function( ) {
+    var player = this.find("#player").val( );
+    var penalty = this.find("#penalty").val( );
+    var team = this.team( );
+
+    var announces = [ team.find('#name').val( ) + ' PENALTY', player, penalty ];
+    postJson('/announce', { messages : announces });
+}
+
 jQuery.fn.unserializePenaltiesJson = function(data) {
-    $(this).find(".penalty_queue").each(function(i,e) {
+    this.find(".penalty_queue").each(function(i,e) {
         if (i < data.activeQueueStarts.length) {
-            $(e).find("#start").val(data.activeQueueStarts[i]);
+            $(e).find("#start").timeval(data.activeQueueStarts[i]);
         }
 
         if (i < data.activeQueues.length) {
@@ -321,10 +340,109 @@ jQuery.fn.penaltyQueueClear = function() {
     $(this).find(".penaltyData").remove();
 }
 
-// Start the penalty queue's start time to now.
+// Set the penalty queue's start time to now.
 jQuery.fn.penaltyQueueStartNow = function() {
-    $(this).find("#start").val(clockState.time_elapsed);
+    $(this).find("#start").timeval(clockState.time_elapsed);
 }
+
+jQuery.fn.timeval = function(tv) {
+    /* FIXME: allow for 20 min playoff overtimes */
+    var overtime_length = 5*60*10;
+    var period_length = 20*60*10;
+    var n_periods = 3;
+
+    if (typeof tv === 'number') {
+        // set value
+        var period = 0;
+        var overtime = 0;
+
+        console.log('parsing timeval ' + tv)
+
+        while (tv >= period_length && period < n_periods) {
+            tv -= period_length;
+            period++;
+        }
+
+        console.log('period ' + period)
+
+        while (period == n_periods && tv >= overtime_length) {
+            tv -= overtime_length;
+            overtime++;
+        }
+
+        console.log('overtime ' + overtime)
+
+        var c_length;
+
+        period = period + overtime;
+
+        if (period >= n_periods) {
+            c_length = overtime_length;
+        } else {
+            c_length = period_length;
+        }
+        
+        tv = c_length - tv;
+
+        console.log('tv ' + tv)
+
+        this.val(formatTime(tv) + ' ' + (period+1));
+    } else {
+        // parse value
+        var val = this.val( );
+        var re = /((\d+):)?(\d+)(.(\d+))? (\d)/
+        var result = re.exec(val);
+
+        if (result) {
+            var minutes = result[2];
+            var seconds = result[3];
+            var tenths = result[5];
+            var period = result[6];
+            var parsed = 0;
+            var period_num = 0;
+            var overtime_num = 0;
+            var c_length = period_length;
+
+            if (typeof minutes !== 'undefined') {
+                parsed = parsed + parseInt(minutes) * 600;
+            }
+
+            if (typeof seconds !== 'undefined') {
+                parsed = parsed + parseInt(seconds) * 10;
+            }
+
+            if (typeof tenths !== 'undefined') {
+                parsed = parsed + parseInt(tenths);
+            }
+
+
+            if (typeof period !== 'undefined') {
+                period_num = parseInt(period) - 1;
+            } else {
+                /* period_num = current period */
+            }
+
+            /* adjust for overtime */
+            if (period_num >= 3) {
+                overtime_num = period_num - 3;
+                period_num = 3;
+                c_length = overtime_length;
+            }
+
+            /* convert from time remaining to time elapsed */
+            if (parsed > c_length) {
+                parsed = c_length; 
+            }
+            parsed = c_length - parsed;
+            
+            parsed += period_num * period_length;
+            parsed += overtime_num * overtime_length;
+
+            return parsed;
+        }
+    }
+}
+
 
 // Find the time at which a penalty queue will end.
 // e.g. $("#homeTeam #pq1").penaltyQueueEnd()
@@ -332,7 +450,7 @@ jQuery.fn.penaltyQueueStartNow = function() {
 jQuery.fn.penaltyQueueEnd = function() {
     var total = 0;
     var time = clockState.time_elapsed;
-    var penalty_end = intOrZero($(this).find("#start").val());
+    var penalty_end = intOrZero($(this).find("#start").timeval());
     var count = 0;
 
     $(this).find(".penaltyData").each(function(i,e) {
@@ -351,7 +469,7 @@ jQuery.fn.penaltyQueueEnd = function() {
 // Find the length of a penalty...
 // e.g. $("find_some_penalty_div").penaltyLength()
 jQuery.fn.penaltyLength = function() {
-    return $(this).find("select option:selected").val();
+    return parseInt($(this).find("select option:selected").val());
 }
 
 
@@ -379,7 +497,7 @@ function penaltyQueueStartNow() {
 // penaltyQueueStartLastStop
 // Set penalty queue start time to last play stoppage
 function penaltyQueueStartLastStop() {
-    $(this).penaltyQueue().find("#start").val(lastStopTimeElapsed);
+    $(this).penaltyQueue().find("#start").timeval(lastStopTimeElapsed);
 }
 
 // goalScored
@@ -391,6 +509,11 @@ function goalScored() {
     $(this).team().putTeamData();
     // trigger any kind of blinky goal animations (or whatever)
     viewCommand({"goal_scored_by" : $(this).team().data('url')});
+}
+
+function emptyNet() {
+    $(this).team().find("#status").val("EMPTY NET");
+    $(this).team().putTeamData();
 }
 
 // lockControl
@@ -407,8 +530,11 @@ function unlockControl() {
 // get values of all input fields within the matched elements as JSON
 jQuery.fn.serializeInputsJson = function() {
     var result = { };
-    $(this).find("input,select").each(function(i,e) {
+    $(this).find("input:text,select").each(function(i,e) {
         result[$(e).attr('id')] = $(e).val();
+    });
+    $(this).find("input:checkbox").each(function(i,e) {
+        result[$(e).attr('id')] = $(e).is(':checked');
     });
     return result;
 }

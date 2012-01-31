@@ -117,7 +117,11 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 <tr><td>BgColor</td><td><input type="text" id="bgcolor" /></td></tr>
                 <tr><td>Score</td><td><input type="text" id="score" /></td></tr>
                 <tr><td>Shots</td><td><input type="text" id="shotsOnGoal" /></td></tr>
+                <tr><td>Empty Net</td><td><input type="checkbox" id="emptyNet" /></td></tr>
+                <tr><td>Delayed Penalty</td><td><input type="checkbox" id="delayedPenalty" /></td></tr>
             </table>
+                        
+
 
             <button id="lockControl">Lock Controls</button>
             <button id="unlockControl">Unlock Controls</button>
@@ -131,13 +135,13 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 <div class="penalty_queue" id="pq1"> 
                     <label for="start">Start Time</label>
                     <input type="text" name="start" id="start" />
-                    <button id="now">Now</button><button id="last">Last Stop</button>
+                    <button id="now">Now</button>
                     <ul class="penalty_list"></ul>
                 </div>
                 <div class="penalty_queue" id="pq2">
                     <label for="start">Start Time</label>
                     <input type="text" name="start" id="start" />
-                    <button id="now">Now</button><button id="last">Last Stop</button>
+                    <button id="now">Now</button>
                     <ul class="penalty_list"></ul>
                 </div>
 
@@ -154,6 +158,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                                     <option id="time_6000" value="6000">Misconduct (10:00)</option>
                                 </select>
                             </td></tr>
+
+                            <button id="announcePenalty">Announce</button>
                         </table>
                     </li>
                 </ul>

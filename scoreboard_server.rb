@@ -124,6 +124,8 @@ end
 # the base data structure everything uses is a JSON format object.
 # These are here to provide easier access to that data from views.
 class TeamHelper
+    attr_accessor :flag
+
     def initialize(team_data, clock)
         @team_data = team_data
         @clock = clock
@@ -167,6 +169,14 @@ class TeamHelper
 
     def strength
         penalties.strength
+    end
+
+    def empty_net
+        @team_data['emptyNet'] and @team_data['emptyNet'] != 'false'
+    end
+
+    def delayed_penalty
+        @team_data['delayedPenalty'] and @team_data['delayedPenalty'] != 'false'
     end
 end
 
@@ -228,6 +238,7 @@ class AnnounceHelper
     def initialize(announce_array)
         @announce = announce_array
         @announce_handled = false 
+        @frames = 0
     end
 
     def bring_up
@@ -251,6 +262,8 @@ class AnnounceHelper
     end
 
     def next
+        STDERR.puts "going to next announce!"
+        @frames = 0
         if @announce.length > 0
             @announce.shift
         else
@@ -265,6 +278,8 @@ class AnnounceHelper
             ''
         end
     end
+
+    attr_accessor :frames
 end
 
 class StatusHelper
@@ -379,7 +394,10 @@ class ScoreboardApp < Patchbay
 
                 # roster autocompletion list
                 'autocompletePlayers' => [
-                ]
+                ],
+
+                'emptyNet' => false,
+                'delayedPenalty' => false
             },
             {
                 'name' => 'UNION',
@@ -395,7 +413,9 @@ class ScoreboardApp < Patchbay
                     'activeQueueStarts' => [ 0, 0 ]
                 },
                 'autocompletePlayers' => [
-                ]
+                ],
+                'emptyNet' => false,
+                'delayedPenalty' => false
             }
         ]
     end
@@ -679,6 +699,12 @@ class ScoreboardView
 
         @animations.each do |ani|
             ani.frame_advance
+        end
+
+        announce.frames += 1
+
+        if announce.frames == 90
+            announce.next
         end
 
         render_template

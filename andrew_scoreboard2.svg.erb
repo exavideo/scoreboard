@@ -162,19 +162,70 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
          id="rpitv_logo"
          style="overflow:visible" />
     </g>
-<?rb if home_team.strength < 5 or away_team.strength < 5           
-        smaller, bigger = [home_team.strength, away_team.strength].minmax
+<?rb 
+    
+    message = nil
+    time_to_change = ''
+    home_team.flag = false
+    away_team.flag = false
+
+    # priority decode team states...
+    if home_team.delayed_penalty
+        message = "DELAYED PENALTY"
+        home_team.flag = true
+    elsif away_team.delayed_penalty
+        message = "DELAYED PENALTY"
+        away_team.flag = true
+    elsif home_team.strength != 5 or away_team.strength != 5
+        smaller = [home_team, away_team].min_by { |x| x.strength }
+        if smaller == home_team
+            bigger = away_team
+        else
+            bigger = home_team
+        end
 
         time_to_change = format_time_without_tenths([
             home_team.penalties.time_to_strength_change, 
             away_team.penalties.time_to_strength_change
         ].reject { |x| x == 0 }.min)
 
-        if bigger == 5 and smaller == 4
-            message = "POWER PLAY #{time_to_change}"
+        # simple case: penalty, no empty nets
+        if not bigger.empty_net and not smaller.empty_net
+            if bigger.strength > smaller.strength
+                bigger.flag = true
+            end
+            
+            if bigger.strength == 5 and smaller.strength == 4
+                message = "POWER PLAY"
+            else
+                message = "#{bigger.strength}-ON-#{smaller.strength}"
+            end
+        elsif bigger.empty_net and not smaller.empty_net
+            bigger.flag = true
+            if bigger.strength == 5 and smaller.strength == 4
+                message = "EMPTY NET + PP"
+            else
+                message = "EMPTY #{bigger.strength+1}-ON-#{smaller.strength}"
+                if bigger.strength > smaller.strength
+                    bigger.flag = true
+                end
+            end
+        elsif smaller.empty_net and not bigger.empty_net
+            message = "EMPTY #{bigger.strength}-ON-#{smaller.strength+1}"
         else
-            message = "#{bigger}-ON-#{smaller} #{time_to_change}"
+            message = "WTF EMPTY NETS"
         end
+    elsif home_team.empty_net and away_team.empty_net
+        message = "WTF EMPTY NETS"
+    elsif home_team.empty_net and not away_team.empty_net
+        message = "EMPTY NET"
+        home_team.flag = true
+    elsif away_team.empty_net and not home_team.empty_net
+        message = "EMPTY NET"
+        away_team.flag = true
+    end
+
+    if message
 ?>    <g
        id="powerPlayClock">
       <path
@@ -198,7 +249,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                x="229.82007"
                y="580.1062"
                id="announceText"
-               style="font-size:22px">@{ message }@</tspan></text>
+               style="font-size:22px">@{ message }@ @{ time_to_change }@</tspan></text>
     </g>
 <?rb end ?><?rb if announce.is_up ?>    <g
        id="announce">
@@ -230,13 +281,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 <?rb end ?>    
 
 <?rb
-    if home_team.strength > away_team.strength
-        htbg = '#ffff00'
-        htfg = '#000000'
-    else
-        htbg = home_team.bgcolor
-        htfg = home_team.fgcolor
-    end
+    htbg = home_team.flag ? '#ffff00' : home_team.bgcolor
+    htfg = home_team.flag ? '#000000' : home_team.fgcolor
 ?>
     <g id="homeTeam">
       <path
@@ -292,13 +338,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
            id="awayScoreText">@{ away_team.score }@</tspan></text>
     </g>
 <?rb
-    if away_team.strength > home_team.strength
-        atbg = '#ffff00'
-        atfg = '#000000'
-    else
-        atbg = away_team.bgcolor
-        atfg = away_team.fgcolor
-    end
+    atbg = away_team.flag ? '#ffff00' : away_team.bgcolor
+    atfg = away_team.flag ? '#000000' : away_team.fgcolor
 ?>
     <g
        id="awayTeam">
