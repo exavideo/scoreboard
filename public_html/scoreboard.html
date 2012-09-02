@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <!--
 Copyright 2011 Exavideo LLC.
 
@@ -19,6 +20,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 <html>
     <head>
+        <title>Hockey Scoreboard</title>
         <script src="js/jquery-1.6.2.min.js"></script>
         <script src="js/jquery-ui-1.8.15.custom.min.js"></script>
         <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.15.custom.css" />
@@ -48,6 +50,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             }
 
             .teamControl {
+                border: 1px dotted blue;
                 float: left;
                 width: 18em;
             }
@@ -60,6 +63,10 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
             #main {
                 padding: 10px;
+            }
+
+            object::-webkit-scrollbar {
+                display: none;
             }
         </style>
 
@@ -106,11 +113,17 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                         <input id="period" type="text" style="width:3em" />
                         <button id="setClock" type="text">Set Clock</button>
                     </p>
-                    
+                    <p id="otLength">
+                        OT Length:
+                        <select id="otLengthCombo" name="otLengthCombo">
+                            <option id="otlen_5m" value="3000">5 min</option>
+                            <option id="otlen_20m" value="12000">20 min</option>
+                       </select>
+                    </p>
                 </div>
                 <div id="announceControl" class="control">
                     Announce <br />
-                    <input type="text" id="textInput" /><br />
+                    <input type="text" id="textInput" style="width: 20em" /><br />
                     <button id="announce">Announce</button>
                     <button id="status">Status</button>
                     <button id="clearStatus">Clear Status</button>
@@ -129,27 +142,42 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             <div class="teamControl" id="awayTeamControl"></div>
             <div class="teamControl" id="homeTeamControl"></div>
             <div style="clear:left"></div>
-            <div id="preview" class="control" style="width:600px; height:400px">Preview <br /><img src="/preview" /></div>
+            <div id="preview" class="control" style="width:1480px; height:120px">Preview <br /><object  style="width:1460px; height:100px; overflow:visible" type="image/svg+xml" data="/preview" /></div>
         </div>
 
         <div style="display: none" id="teamProto">
             <table id="lockableInputs">
-                <tr><td>Name</td><td><input type="text" id="name" /></td></tr>
-                <tr><td>FgColor</td><td><input type="text" id="fgcolor" /></td></tr>
-                <tr><td>BgColor</td><td><input type="text" id="bgcolor" /></td></tr>
-                <tr><td>Score</td><td><input type="text" id="score" /></td></tr>
-                <tr><td>Shots</td><td><input type="text" id="shotsOnGoal" /></td></tr>
+                <tr><td>Name</td><td colspan="2">
+                    <input type="text" id="name" style="width:8em" />
+                    <select id="fontWidth" name="fontWidth">
+                        <option id="fontWidth_regular" value="0">W</option>
+                        <option id="fontWidth_narrow" value="1">N</option>
+                    </select>
+                </td></tr>
+                <tr><td>FgColor</td><td colspan="2"><input type="text" id="fgcolor" /></td></tr>
+                <tr><td>BgColor</td><td colspan="2"><input type="text" id="bgcolor" /></td></tr>
+                <tr>
+                    <td>Score</td>
+                    <td><input type="text" id="score" style="width:5em; text-align:right" /></td>
+                    <td><button id="goal">Goal</button></td>
+                </tr>
+                <tr>
+                    <td>Shots</td>
+                    <td><input type="text" id="shotsOnGoal" style="width:5em; text-align:right" /></td>
+                    <td><button id="shotOnGoal">Shot +1</button></td>
+                </tr>
                 <tr><td>Empty Net</td><td><input type="checkbox" id="emptyNet" /></td></tr>
                 <tr><td>Delayed Penalty</td><td><input type="checkbox" id="delayedPenalty" /></td></tr>
-            </table>
-                        
-
+            </table>                        
 
             <button id="lockControl">Lock Controls</button>
-            <button id="unlockControl">Unlock Controls</button>
-            <button id="goal">Goal</button>
-            <button id="minorPenalty">Minor Penalty</button>
-            <button id="majorPenalty">Major Penalty</button>
+            <button id="unlockControl">Unlock Controls</button><br/><br/>
+
+            Player&nbsp;&nbsp;<input type="text" id="penaltyPlayer" /><br/>
+            Penalty&nbsp;&nbsp;<input type="text" id="penaltyPenalty" /><br/>
+            Add: <button id="minorPenalty">Minor</button>
+            <button id="doubleMinorPenalty">Double Minor</button>
+            <button id="majorPenalty">Major</button><br/>
             <button id="clearPenalties">Clear Penalties</button>
             <button id="editPenalties">Edit Penalties</button>
 
@@ -196,10 +224,6 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 <p>
                     <label for="scorer">Scored by</label> 
                     <input type="text" name="scorer" id="scorer" />
-                </p>
-                <p>
-                    <label for="assist">Assisted by</label>
-                    <input type="text" id="assist" name="assist" />
                 </p>
                 <p>
                     <label for="assist">Assisted by</label>

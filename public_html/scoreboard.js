@@ -22,13 +22,14 @@
 var autocompletePenalties = [];
 var clockState = { };
 var lastStopTimeElapsed = 0;
+var overtime_length = 5*60*10;
 
 function getJson(sourceurl, callback) {
     jQuery.ajax({
         url: sourceurl,
         dataType: "json",
         error: function(jqxhr, textStatus) {
-            //alert("Communication failure: " + textStatus);
+            console.log("Communication failure: " + textStatus);
         },
         success: function(data) {
             callback(data);
@@ -71,7 +72,7 @@ function fieldsetToJson(fieldset) {
 }
 
 function isInt(x) {
-    var y = parseInt(x);
+    var y = parseInt(x, 10);
     if (isNaN(y)) {
         return false;
     }
@@ -81,7 +82,7 @@ function isInt(x) {
 
 function intOrZero(x) {
     if (isInt(x)) {
-        return parseInt(x);
+        return parseInt(x, 10);
     } else {
         return 0;
     }
@@ -142,7 +143,7 @@ function updateClockTimeout( ) {
 }
 
 function updatePreviewTimeout( ) {
-    $("#preview img").removeAttr("src").attr("src", "/preview?" + new Date().getTime());
+    $("#preview object").removeAttr("data").attr("data", "/preview?" + new Date().getTime());
     setTimeout(updatePreviewTimeout, 1000);
 }
 
@@ -157,7 +158,9 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#lockControl").click(lockControl);
         $(elem).find("#unlockControl").click(unlockControl);
         $(elem).find("#goal").click(goalScored);
+        $(elem).find("#shotOnGoal").click(shotTaken);
         $(elem).find("#minorPenalty").click(function() { newPenalty.call(this, 1200); });
+        $(elem).find("#doubleMinorPenalty").click(function() { newPenalty.call(this, 2400); });
         $(elem).find("#majorPenalty").click(function() { newPenalty.call(this, 3000); });
         $(elem).find("#clearPenalties").click(clearPenalties);
         $(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
@@ -227,7 +230,13 @@ function newPenalty(time) {
     var penaltyDiv = $(this).team().newPenaltyDiv();
 
     // set up penalty time correctly (creative selector abuse)
-    penaltyDiv.find('select#time').val(time)
+    penaltyDiv.find('select#time').val(time);
+
+    // load announce strings
+    penaltyDiv.find('input#player').val($(this).team().find('#penaltyPlayer').val());
+    penaltyDiv.find('input#penalty').val($(this).team().find('#penaltyPenalty').val());
+    $(this).team().find('#penaltyPlayer').val('')
+    $(this).team().find('#penaltyPenalty').val('')
 
     // add to the shorter of the two penalty queues
     $(this).team().queuePenalty(penaltyDiv);
@@ -349,11 +358,12 @@ jQuery.fn.penaltyQueueClear = function() {
 // Set the penalty queue's start time to now.
 jQuery.fn.penaltyQueueStartNow = function() {
     $(this).find("#start").timeval(clockState.time_elapsed);
+    $(this).team().putTeamData();
 }
 
 jQuery.fn.timeval = function(tv) {
     /* FIXME: allow for 20 min playoff overtimes */
-    var overtime_length = 5*60*10;
+//  var overtime_length = 5*60*10;
     var period_length = 20*60*10;
     var n_periods = 3;
 
@@ -362,21 +372,21 @@ jQuery.fn.timeval = function(tv) {
         var period = 0;
         var overtime = 0;
 
-        console.log('parsing timeval ' + tv)
+        console.log('parsing timeval ' + tv);
 
         while (tv >= period_length && period < n_periods) {
             tv -= period_length;
             period++;
         }
 
-        console.log('period ' + period)
+        console.log('period ' + period);
 
         while (period == n_periods && tv >= overtime_length) {
             tv -= overtime_length;
             overtime++;
         }
 
-        console.log('overtime ' + overtime)
+        console.log('overtime ' + overtime + ' length ' + overtime_length);
 
         var c_length;
 
@@ -410,20 +420,20 @@ jQuery.fn.timeval = function(tv) {
             var c_length = period_length;
 
             if (typeof minutes !== 'undefined') {
-                parsed = parsed + parseInt(minutes) * 600;
+                parsed = parsed + parseInt(minutes, 10) * 600;
             }
 
             if (typeof seconds !== 'undefined') {
-                parsed = parsed + parseInt(seconds) * 10;
+                parsed = parsed + parseInt(seconds, 10) * 10;
             }
 
             if (typeof tenths !== 'undefined') {
-                parsed = parsed + parseInt(tenths);
+                parsed = parsed + parseInt(tenths, 10);
             }
 
 
             if (typeof period !== 'undefined') {
-                period_num = parseInt(period) - 1;
+                period_num = parseInt(period, 10) - 1;
             } else {
                 /* period_num = current period */
             }
@@ -475,7 +485,7 @@ jQuery.fn.penaltyQueueEnd = function() {
 // Find the length of a penalty...
 // e.g. $("find_some_penalty_div").penaltyLength()
 jQuery.fn.penaltyLength = function() {
-    return parseInt($(this).find("select option:selected").val());
+    return parseInt($(this).find("select option:selected").val(), 10);
 }
 
 
@@ -524,6 +534,13 @@ function goalScored() {
     viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
 
+function shotTaken() {
+    $(this).team().find("#shotsOnGoal").val(
+        intOrZero($(this).team().find("#shotsOnGoal").val()) + 1
+    );
+    $(this).team().putTeamData();
+}
+
 function emptyNet() {
     $(this).team().find("#status").val("EMPTY NET");
     $(this).team().putTeamData();
@@ -532,11 +549,11 @@ function emptyNet() {
 // lockControl
 // Toggle whether the team setup controls are locked or unlocked.
 function lockControl() {
-    $(this).team().find("#lockableInputs input").attr("disabled","disabled");
+    $(this).team().find("#lockableInputs input[type=text]").attr("disabled","disabled");
 }
 
 function unlockControl() {
-    $(this).team().find("#lockableInputs input").removeAttr("disabled");
+    $(this).team().find("#lockableInputs input[type=text]").removeAttr("disabled");
 }
 
 // serializeInputsJson
@@ -592,6 +609,10 @@ function postStatus() {
     putJson('/status', { message : announceStatusTextInput() });
 }
 
+function clearStatus() {
+    putJson('/status', { message : "" });
+}
+
 function viewCommand(cmd) {
     putJson('/view_command', cmd);
 }
@@ -642,10 +663,24 @@ function getAutosync() {
     });
 }
 
+function getSettings() {
+    getJson('/settings', function(data) {
+        $("#otLengthCombo").val(data.otlen);
+        overtime_length = data.otlen;
+    }); 
+}
+
+function changeOtLength() {
+    overtime_length = $("#otLengthCombo").val();
+    putJson('/settings', { 'otlen' : overtime_length });
+    $('.teamControl').team().each( function(index) { $(this).putTeamData(); } );
+}
+
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
     getAutosync( );
+    getSettings( );
 
     $(".teamControl").buildTeamControl();
     // set up team URLs and load initial data
@@ -670,9 +705,11 @@ $(document).ready(function() {
     $("#periodAdvance").click(periodAdvance);
     $("#announceControl #announce").click(postAnnounce);
     $("#announceControl #status").click(postStatus);
+    $("#announceControl #clearStatus").click(clearStatus);
     $("#announceControl #nextAnnounce").click(nextAnnounce);
     $("#transitionControl #up").click(scoreboardUp);
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
+    $("#otLengthCombo").change(changeOtLength);
 });

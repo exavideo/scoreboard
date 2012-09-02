@@ -69,15 +69,15 @@ class GameClock
         @value = @period_end - tenths
     end
 
-    def reset_time(elapsed, newperiod)
+    def reset_time(remaining, newperiod)
         if newperiod <= 3
             # normal period
-            @value = (20*60*10) - elapsed + 20*60*10*(newperiod-1)
-            @period_end = 20*60*10*(newperiod)
+            @value = @period_length - remaining + @period_length*(newperiod-1)
+            @period_end = @period_length*(newperiod)
         else
             # overtime
-            @value = (5*60*10)*(newperiod-3) - elapsed + 20*60*10*3
-            @period_end = 20*60*10*3 + (5*60*10)*(newperiod-3)
+            @value = @overtime_length*(newperiod-3) - remaining + @period_length*3
+            @period_end = @period_length*3 + @overtime_length*(newperiod-3)
         end
         if @last_start != nil
             @last_start = Time.now
@@ -85,7 +85,13 @@ class GameClock
         @period = newperiod
     end
 
+    def overtime_length=(new_otlen)
+        @overtime_length = new_otlen
+        reset_time(period_remaining(), @period)
+    end
+
     attr_reader :period
+    attr_reader :overtime_length
 
     def start
         if @value == @period_end
@@ -182,6 +188,10 @@ class TeamHelper
     def delayed_penalty
         @team_data['delayedPenalty'] and @team_data['delayedPenalty'] != 'false'
     end
+
+    def fontWidth
+        @team_data['fontWidth']
+    end
 end
 
 class PenaltyHelper
@@ -207,10 +217,13 @@ class PenaltyHelper
         result = -1
 
         @penalty_data['activeQueues'].each_with_index do |queue, i|
-            qstart = @penalty_data['activeQueueStarts'][i].to_i
-            qlength = queue_length(queue)
-            qend = qstart + qlength
-            time_remaining_on_queue = qend - @clock.time_elapsed
+            time_remaining_on_queue = -1
+            if queue.length > 0
+                qstart = @penalty_data['activeQueueStarts'][i].to_i
+                qlength = queue_length(queue)
+                qend = qstart + qlength
+                time_remaining_on_queue = qend - @clock.time_elapsed
+            end
 
             if time_remaining_on_queue > 0
                 if time_remaining_on_queue < result or result == -1
@@ -424,7 +437,8 @@ class ScoreboardApp < Patchbay
                 ],
 
                 'emptyNet' => false,
-                'delayedPenalty' => false
+                'delayedPenalty' => false,
+                'fontWidth' => 0
             },
             {
                 'name' => 'RPI',
@@ -442,7 +456,8 @@ class ScoreboardApp < Patchbay
                 'autocompletePlayers' => [
                 ],
                 'emptyNet' => false,
-                'delayedPenalty' => false
+                'delayedPenalty' => false,
+                'fontWidth' => 0
             }
         ]
     end
@@ -525,7 +540,7 @@ class ScoreboardApp < Patchbay
     get '/autosync' do
         render :json => {
             'enabled' => @autosync_enabled
-        }
+        }.to_json
     end
 
     put '/autosync' do
@@ -534,6 +549,27 @@ class ScoreboardApp < Patchbay
         else
             @autosync_enabled = false
         end
+
+        render :json => {
+            'enabled' => @autosync_enabled
+        }.to_json
+    end
+
+    put '/settings' do
+        otlen = incoming_json['otlen'].to_i
+        if (otlen > 0) 
+            @clock.overtime_length = otlen
+        end
+
+        render :json => {
+            'otlen' => @clock.overtime_length
+        }.to_json
+    end
+
+    get '/settings' do
+        render :json => {
+            'otlen' => @clock.overtime_length
+        }.to_json     
     end
 
     post '/announce' do
@@ -746,9 +782,9 @@ class ScoreboardView
                 }
             elsif (cmd.has_key? 'goal_scored_by')
                 if cmd['goal_scored_by'] =~ /\/0$/
-                    goal_flash(@home_goal_flasher)
-                elsif cmd['goal_scored_by'] =~ /\/1$/
                     goal_flash(@away_goal_flasher)
+                elsif cmd['goal_scored_by'] =~ /\/1$/
+                    goal_flash(@home_goal_flasher)
                 end
             end
         end
@@ -791,7 +827,7 @@ class ScoreboardView
 end
 
 app = ScoreboardApp.new
-app.view = ScoreboardView.new('andrew_scoreboard2.svg.erb')
+app.view = ScoreboardView.new('reilly_scoreboard.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3002) }
 
