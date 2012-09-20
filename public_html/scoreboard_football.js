@@ -777,6 +777,7 @@ $(document).ready(function() {
     $("#toGoEnter").click( customToGo );
     $("#showDD").click( showDD );
     $("#clearDD").click( clearDD );
+    $("#flagDD").click( flagDD );
 
 });
 
@@ -794,9 +795,9 @@ function updateDD( ) {
 }
 
 function customToGo() {
-    var customToGo = $("#toGoCustom").val();
-    if ( isInt(customToGo) ) {
-        togo = customToGo;
+    var customtogo = intOrZero($("#toGoCustom").val());
+    if ( customtogo > 0 ) {
+        togo = customtogo;
     }
     updateDD();
 }
@@ -807,5 +808,9 @@ function showDD() {
 
 function clearDD() {
     putJson('/downdist', { message : "" });
+}
+
+function flagDD() {
+    putJson('/downdist', { message : "FLAG" });
 }
 
