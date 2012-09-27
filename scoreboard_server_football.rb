@@ -839,7 +839,7 @@ class ScoreboardView
 end
 
 app = ScoreboardApp.new
-app.view = ScoreboardView.new('reilly_scoreboard_football.svg.erb')
+app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3002) }
 
@@ -877,15 +877,22 @@ Thread.new do
             end
         end
     rescue Exception => e
-        p e
+        STDERR.puts e.inspect
     end
 end
 
 dirty_level = 1
 
+def dump_to_file(x)
+    File.open("scbd_lastframe", "wb") do |f|
+        f.write(x)
+    end
+end
+
 while true
     # prepare next SVG frame
     data = app.view.render
+
     # build header with data length and global alpha
     header = [ data.length, app.view.galpha, dirty_level ].pack('LCC')
 
