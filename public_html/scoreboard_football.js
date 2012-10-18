@@ -166,7 +166,8 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#plusSix").click(function() { addPoints.call(this, 6); });
 
         $(elem).find("#shotOnGoal").click(shotTaken);
-        $(elem).find("#takeTimeout").click(timeoutTaken);        
+        $(elem).find("#takeTimeout").click(timeoutTaken);  
+        $(elem).find("#possession").click(possessionChange);        
         $(elem).find("#minorPenalty").click(function() { newPenalty.call(this, 1200); });
         $(elem).find("#doubleMinorPenalty").click(function() { newPenalty.call(this, 2400); });
         $(elem).find("#majorPenalty").click(function() { newPenalty.call(this, 3000); });
@@ -567,7 +568,20 @@ function timeoutTaken() {
     if (tol > 0) {
         $(this).team().find("#timeoutsLeft").val(tol - 1);
         $(this).team().putTeamData();
-        putJson('/status', { message : $(this).team().find("#name").val() + " TIMEOUT" });
+        putJson('/status', { message : "TIMEOUT " + $(this).team().find("#name").val() });
+    }
+}
+
+function possessionChange() {
+    var this_poss = $(this).team().find("#possession");
+    if (this_poss.is(':checked')) {
+        $(".teamControl").each( function(index) {
+            var other_poss = $(this).find("#possession");
+            if (other_poss.get(0) !== this_poss.get(0)) {
+                other_poss.prop('checked', false);
+                $(this).putTeamData();
+            }
+        } );
     }
 }
 

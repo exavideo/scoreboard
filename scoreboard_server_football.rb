@@ -144,7 +144,11 @@ class TeamHelper
     end
 
     def name
-        @team_data['name']
+        if @team_data['possession']
+            "\xe2\x80\xa2" + @team_data['name']
+        else
+            @team_data['name']
+        end
     end
 
     def fgcolor
@@ -168,7 +172,7 @@ class TeamHelper
     end
 
     def timeouts
-        @team_data['timeoutsLeft']
+        @team_data['timeoutsLeft'].to_i
     end
 
     def called_timeout
@@ -448,6 +452,7 @@ class ScoreboardApp < Patchbay
 
                 'emptyNet' => false,
                 'delayedPenalty' => false,
+                'possession' => false,
                 'fontWidth' => 0
             },
             {
@@ -467,6 +472,7 @@ class ScoreboardApp < Patchbay
                 ],
                 'emptyNet' => false,
                 'delayedPenalty' => false,
+                'possession' => false,
                 'fontWidth' => 0
             }
         ]
@@ -884,7 +890,7 @@ Thread.new do
             end
         end
     rescue Exception => e
-        p e
+        STDERR.puts e.inspect
     end
 end
 
