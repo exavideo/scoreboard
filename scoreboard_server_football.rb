@@ -194,6 +194,10 @@ class TeamHelper
     def fontWidth
         @team_data['fontWidth']
     end
+
+    def status
+        @team_data['status']
+    end
 end
 
 class PenaltyHelper
@@ -443,7 +447,8 @@ class ScoreboardApp < Patchbay
 
                 'emptyNet' => false,
                 'delayedPenalty' => false,
-                'fontWidth' => 0
+                'fontWidth' => 0,
+                'status' => ''
             },
             {
                 'name' => 'RPI',
@@ -462,7 +467,8 @@ class ScoreboardApp < Patchbay
                 ],
                 'emptyNet' => false,
                 'delayedPenalty' => false,
-                'fontWidth' => 0
+                'fontWidth' => 0,
+                'status' => ''
             }
         ]
     end
