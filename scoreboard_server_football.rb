@@ -144,7 +144,11 @@ class TeamHelper
     end
 
     def name
-        @team_data['name']
+        if @team_data['possession']
+            "\xe2\x80\xa2" + @team_data['name']
+        else
+            @team_data['name']
+        end
     end
 
     def fgcolor
@@ -168,7 +172,7 @@ class TeamHelper
     end
 
     def timeouts
-        @team_data['timeoutsLeft']
+        @team_data['timeoutsLeft'].to_i
     end
 
     def called_timeout
@@ -315,6 +319,10 @@ class StatusHelper
         @app.status
     end
 
+    def color
+        @app.status_color
+    end
+
     def bring_up
         if @app.status != '' && !@status_up
             @status_up = true
@@ -403,11 +411,12 @@ class ScoreboardApp < Patchbay
         @teams = load_team_config
         @announces = []
         @status = ''
+        @status_color = 'white'
         @downdist = ''
         @autosync_enabled = false
     end
 
-    attr_reader :status
+    attr_reader :status, :status_color
 
     def load_team_config
         # construct a JSON-ish data structure
@@ -447,6 +456,7 @@ class ScoreboardApp < Patchbay
 
                 'emptyNet' => false,
                 'delayedPenalty' => false,
+                'possession' => false,
                 'fontWidth' => 0,
                 'status' => ''
             },
@@ -467,6 +477,7 @@ class ScoreboardApp < Patchbay
                 ],
                 'emptyNet' => false,
                 'delayedPenalty' => false,
+                'possession' => false,
                 'fontWidth' => 0,
                 'status' => ''
             }
@@ -595,12 +606,14 @@ class ScoreboardApp < Patchbay
 
     put '/status' do
         @status = incoming_json['message']
+        @status_color = 'white'
         render :json => ''
     end
 
     put '/downdist' do 
         @downdist = incoming_json['message']
         @status = @downdist
+        @status_color = (@status == 'FLAG') ? 'yellow' : 'white'
         STDERR.puts @downdist
         render :json => ''
     end

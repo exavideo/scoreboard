@@ -73,6 +73,10 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 padding: 10px;
             }
 
+            #downButtons td {
+                padding: 2px;
+            }
+
             object::-webkit-scrollbar {
                 display: none;
             }
@@ -109,9 +113,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 		                    </td></tr>
                         </table>
                     <p>
-<!--                    <button id="startClock">Start</button>
-                        <button id="stopClock">Stop</button>
--->                     <button id="periodAdvance">Period Advance</button>
+                        <button id="periodAdvance">Period Advance</button>
                         <input type="checkbox" id="autoSync"> Enable Auto-Sync</input>
                     </p>
                     <p id="clockSet">
@@ -150,9 +152,17 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 <div class="teamControl" id="awayTeamControl"></div>
                 <div class="teamControl" id="homeTeamControl"></div>
                 <div id="downControl" class="control" style="clear: left">
-                    <span id="downAndDistance" style="font-size: 16pt">1st & 10</span><br/>
-                    <button id="showDD" style="text-align: right">Down & Distance</button>
-                    <button id="clearDD" style="text-align: right">Clear D&D</button><br/>
+                    <table id="downButtons"><tr>
+                        <td style="width: 10em">
+                            <span id="downAndDistance" style="font-size: 16pt">1st & 10</span>
+                        </td><td style="background-color: orangered">
+                            <button id="showDD" style="height: 3em">Down & Distance</button>
+                        </td><td style="background-color: gray">
+                            <button id="clearDD" style="height: 3em">Clear D&D</button>
+                        </td><td style="background-color: yellow">
+                            <button id="flagDD" style="height: 3em">FLAG</button>
+                        </td>
+                    </tr></table>
                     Down<br/>
                     <button id="down1" class="down">1st</button>
                     <button id="down2" class="down">2nd</button>
@@ -195,7 +205,9 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
             </div>
             <div style="clear:left"></div>
-            <div id="preview" class="control" style="width:1480px; height:120px">Preview <br /><object  style="width:1460px; height:100px; overflow:visible" type="image/svg+xml" data="/preview" /></div>
+            <div id="preview" class="control" style="width:1480px; height:120px">Preview <br />
+                <object style="width:1460px; height:100px; overflow:visible" type="image/svg+xml" data="/preview" />
+            </div>
         </div>
 
         <div style="display: none" id="teamProto">
@@ -223,6 +235,10 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                     <td>TOL</td>
                     <td><input type="text" id="timeoutsLeft" style="width:5em; text-align:right" /></td>
                     <td><button id="takeTimeout">Timeout</button></td>
+                </tr>
+                <tr>
+                    <td>Poss</td>
+                    <td colspan="2"><input type="checkbox" id="possession" style=""/></td>
                 </tr>
             </table>                        
 
