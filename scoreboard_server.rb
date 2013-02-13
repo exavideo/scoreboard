@@ -22,17 +22,40 @@ require 'erubis'
 require 'thin'
 require 'serialport'
 
+class ClockSettings
+    def initialize(period_length, overtime_length, num_periods)
+        @period_length = period_length
+        @num_periods = num_periods
+        @overtime_length = overtime_length
+    end
+
+    attr_reader :period_length
+    attr_reader :overtime_length
+    attr_reader :num_periods
+end
+
+def minutes(x)
+    x*60*10
+end
+
+CLOCK_HOCKEY_REGULAR_SEASON = ClockSettings.new(minutes(20), minutes(5), 3)
+CLOCK_HOCKEY_POSTSEASON = ClockSettings.new(minutes(20), minutes(20), 3)
+CLOCK_FOOTBALL = ClockSettings.new(minutes(15), 0, 4)
+
+# FIXME: need a way to change this more easily than manually editing this file
+CLOCK_MODE = CLOCK_HOCKEY_REGULAR_SEASON
+
 class GameClock
-    def initialize
+    def initialize(preset)
         # Clock value, in tenths of seconds
         @value = 0
         @last_start = nil
         # 15 minutes, in tenths of seconds
-        @period_length = 20*60*10
-        @overtime_length = 0*60*10
+        @period_length = preset.period_length
+        @overtime_length = preset.overtime_length
         @period_end = @period_length
         @period = 1
-        @num_periods = 4
+        @num_periods = preset.num_periods
     end
 
 
@@ -407,7 +430,7 @@ class ScoreboardApp < Patchbay
     def initialize
         super
 
-        @clock = GameClock.new
+        @clock = GameClock.new(CLOCK_MODE)
         @teams = load_team_config
         @announces = []
         @status = ''
@@ -575,23 +598,6 @@ class ScoreboardApp < Patchbay
         render :json => {
             'enabled' => @autosync_enabled
         }.to_json
-    end
-
-    put '/settings' do
-        otlen = incoming_json['otlen'].to_i
-        if (otlen >= 0) 
-            @clock.overtime_length = otlen
-        end
-
-        render :json => {
-            'otlen' => @clock.overtime_length
-        }.to_json
-    end
-
-    get '/settings' do
-        render :json => {
-            'otlen' => @clock.overtime_length
-        }.to_json     
     end
 
     post '/announce' do
