@@ -158,9 +158,6 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#lockControl").click(lockControl);
         $(elem).find("#unlockControl").click(unlockControl);
         $(elem).find("#goal").click(goalScored);
-        $(elem).find("#pts1").click(onePoint);
-        $(elem).find("#pts2").click(twoPoints);
-        $(elem).find("#pts3").click(threePoints);
         $(elem).find("#shotOnGoal").click(shotTaken);
         $(elem).find("#minorPenalty").click(function() { newPenalty.call(this, 1200); });
         $(elem).find("#doubleMinorPenalty").click(function() { newPenalty.call(this, 2400); });
@@ -531,33 +528,6 @@ function deleteSinglePenalty() {
 function goalScored() {
     $(this).team().find("#score").val(
         intOrZero($(this).team().find("#score").val()) + 1
-    );
-    $(this).team().putTeamData();
-    // trigger any kind of blinky goal animations (or whatever)
-    viewCommand({"goal_scored_by" : $(this).team().data('url')});
-}
-
-function onePoint() {
-    $(this).team().find("#score").val(
-        intOrZero($(this).team().find("#score").val()) + 1
-    );
-    $(this).team().putTeamData();
-    // trigger any kind of blinky goal animations (or whatever)
-    viewCommand({"goal_scored_by" : $(this).team().data('url')});
-}
-
-function twoPoints() {
-    $(this).team().find("#score").val(
-        intOrZero($(this).team().find("#score").val()) + 2
-    );
-    $(this).team().putTeamData();
-    // trigger any kind of blinky goal animations (or whatever)
-    viewCommand({"goal_scored_by" : $(this).team().data('url')});
-}
-
-function threePoints() {
-    $(this).team().find("#score").val(
-        intOrZero($(this).team().find("#score").val()) + 3
     );
     $(this).team().putTeamData();
     // trigger any kind of blinky goal animations (or whatever)
