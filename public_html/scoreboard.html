@@ -166,13 +166,16 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                     <td><input type="text" id="shotsOnGoal" style="width:5em; text-align:right" /></td>
                     <td><button id="shotOnGoal">Shot +1</button></td>
                 </tr>
-                <tr><td>Empty Net</td><td><input type="checkbox" id="emptyNet" /></td></tr>
-                <tr><td>Delayed Penalty</td><td><input type="checkbox" id="delayedPenalty" /></td></tr>
+                <tr>
+                    <td>Team Status</td>
+                    <td colspan="2"><input type="text" id="status" style="width: 5em" /></td>
+                </tr>
             </table>                        
 
             <button id="lockControl">Lock Controls</button>
             <button id="unlockControl">Unlock Controls</button><br/><br/>
 
+            <!-- penalty queue buttons -->
             Player&nbsp;&nbsp;<input type="text" id="penaltyPlayer" /><br/>
             Penalty&nbsp;&nbsp;<input type="text" id="penaltyPenalty" /><br/>
             Add: <button id="minorPenalty">Minor</button>
@@ -180,6 +183,12 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             <button id="majorPenalty">Major</button><br/>
             <button id="clearPenalties">Clear Penalties</button>
             <button id="editPenalties">Edit Penalties</button>
+
+            <!-- team status buttons -->
+            <button id="emptyNet">Empty Net</button>
+            <button id="delayedPenalty">Delayed Penalty</button>
+            <button id="timeout">Timeout</button>
+            <button id="clearStatus">Clear Status</button>
 
             <div id="penalty_queue_dialog" class="dialog">
                 <div class="penalty_queue" id="pq1"> 

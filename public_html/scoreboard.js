@@ -179,15 +179,20 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#clearPenalties").click(clearPenalties);
         $(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
         $(elem).find("#editPenalties").click(editPenalties);
-        $(elem).find("#emptyNet").click(emptyNet);
 
+        // FIXME: all these subroutines are overkill
+        // generic team status buttons
+        $(elem).find("#timeout").click(timeout);
 
-        // generic team status stuff for soccer
+        // some specific stuff for soccer
         $(elem).find("#yellowCard").click(yellowCard);
         $(elem).find("#redCard").click(redCard);
         $(elem).find("#substitution").click(substitution);
-        $(elem).find("#timeout").click(timeout);
         $(elem).find("#clearStatus").click(clearTeamStatus);
+
+        // and hockey
+        $(elem).find("#emptyNet").click(emptyNet);
+        $(elem).find("#emptyNet").click(delayedPenalty);
 
         $(elem).find("input,select").change(function() { $(this).team().putTeamData() });
 
@@ -262,9 +267,6 @@ function newPenalty(time) {
 
     // add to the shorter of the two penalty queues
     $(this).team().queuePenalty(penaltyDiv);
-
-    // clear out any delayed penalty
-    $(this).team().find('#delayedPenalty').removeAttr('checked');
 
     // sync team data
     $(this).team().putTeamData();
@@ -564,8 +566,13 @@ function shotTaken() {
 }
 
 function emptyNet() {
-    // what happened here????? it was tied in with penalties FIXME
+    // once upon a time, this was tied in with penalties. FIXME
     $(this).team().find("#status").val("EMPTY NET");
+    $(this).team().putTeamData();
+}
+
+function delayedPenalty() {
+    $(this).team().find("#status").val("DELAYED PENALTY");
     $(this).team().putTeamData();
 }
 
