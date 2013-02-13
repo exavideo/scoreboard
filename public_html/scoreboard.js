@@ -575,9 +575,7 @@ function addPoints(points) {
     );
     $(this).team().putTeamData();
     // trigger any kind of blinky goal animations (or whatever)
-    if (points >= 3) {
-        viewCommand({"goal_scored_by" : $(this).team().data('url')});
-    }
+    viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
 
 function shotTaken() {
