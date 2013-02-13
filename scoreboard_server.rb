@@ -745,6 +745,7 @@ class ScoreboardView
         @announce_text_dissolve = LinearAnimation.new
         @global_dissolve = LinearAnimation.new
 
+        @global_dissolve.cut_in # hack
         @announce_text_dissolve.cut_in
 
         @animations = [ @away_goal_flasher, @home_goal_flasher, 
@@ -827,7 +828,8 @@ class ScoreboardView
 end
 
 app = ScoreboardApp.new
-app.view = ScoreboardView.new('reilly_scoreboard.svg.erb')
+app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked.svg.erb')
+#app.view = ScoreboardView.new('clock_only.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3002) }
 
@@ -865,7 +867,7 @@ Thread.new do
             end
         end
     rescue Exception => e
-        p e
+        STDERR.puts e.inspect
     end
 end
 

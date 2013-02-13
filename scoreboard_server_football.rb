@@ -28,7 +28,7 @@ class GameClock
         @value = 0
         @last_start = nil
         # 15 minutes, in tenths of seconds
-        @period_length = 15*60*10
+        @period_length = 20*60*10
         @overtime_length = 0*60*10
         @period_end = @period_length
         @period = 1
