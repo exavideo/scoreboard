@@ -27,11 +27,12 @@ class GameClock
         # Clock value, in tenths of seconds
         @value = 0
         @last_start = nil
-        # 20 minutes, in tenths of seconds
+        # 15 minutes, in tenths of seconds
         @period_length = 20*60*10
-        @overtime_length = 5*60*10
+        @overtime_length = 0*60*10
         @period_end = @period_length
         @period = 1
+        @num_periods = 4
     end
 
 
@@ -57,7 +58,7 @@ class GameClock
 
     def period_advance
         pl = @period_length
-        if @period+1 > 3
+        if @period+1 > @num_periods
             pl = @overtime_length
         end
         #if time_elapsed == @period_end
@@ -70,14 +71,14 @@ class GameClock
     end
 
     def reset_time(remaining, newperiod)
-        if newperiod <= 3
+        if newperiod <= @num_periods
             # normal period
             @value = @period_length - remaining + @period_length*(newperiod-1)
             @period_end = @period_length*(newperiod)
         else
             # overtime
-            @value = @overtime_length*(newperiod-3) - remaining + @period_length*3
-            @period_end = @period_length*3 + @overtime_length*(newperiod-3)
+            @value = @overtime_length*(newperiod-@num_periods) - remaining + @period_length*@num_periods
+            @period_end = @period_length*@num_periods + @overtime_length*(newperiod-@num_periods)
         end
         if @last_start != nil
             @last_start = Time.now
@@ -91,13 +92,14 @@ class GameClock
     end
 
     attr_reader :period
+    attr_reader :num_periods
     attr_reader :overtime_length
 
     def start
         if @value == @period_end
             # FIXME: handle overtimes correctly...
             @period += 1
-            if (@period > 3)
+            if (@period > @num_periods)
                 @period_end += @overtime_length
             else
                 @period_end += @period_length
@@ -142,7 +144,11 @@ class TeamHelper
     end
 
     def name
-        @team_data['name']
+        if @team_data['possession']
+            "\xe2\x80\xa2" + @team_data['name']
+        else
+            @team_data['name']
+        end
     end
 
     def fgcolor
@@ -166,7 +172,7 @@ class TeamHelper
     end
 
     def timeouts
-        @team_data['timeoutsLeft']
+        @team_data['timeoutsLeft'].to_i
     end
 
     def called_timeout
@@ -191,6 +197,10 @@ class TeamHelper
 
     def fontWidth
         @team_data['fontWidth']
+    end
+
+    def status
+        @team_data['status']
     end
 end
 
@@ -309,6 +319,10 @@ class StatusHelper
         @app.status
     end
 
+    def color
+        @app.status_color
+    end
+
     def bring_up
         if @app.status != '' && !@status_up
             @status_up = true
@@ -346,7 +360,9 @@ class ClockHelper
         minutes = seconds / 60
         seconds = seconds % 60
 
-        if minutes > 0
+        if @clock.overtime_length == 0 && @clock.period > @clock.num_periods
+            ''
+        elsif minutes > 0
             format '%d:%02d', minutes, seconds
         else
             format ':%02d.%d', seconds, tenths
@@ -354,12 +370,12 @@ class ClockHelper
     end
 
     def period
-        if @clock.period <= 3
+        if @clock.period <= @clock.num_periods
             @clock.period.to_s
-        elsif @clock.period == 4
+        elsif @clock.period == @clock.num_periods + 1
             'OT'
         else
-            (@clock.period - 3).to_s + 'OT'
+            (@clock.period - @clock.num_periods).to_s + 'OT'
         end
     end
 end
@@ -395,10 +411,12 @@ class ScoreboardApp < Patchbay
         @teams = load_team_config
         @announces = []
         @status = ''
+        @status_color = 'white'
+        @downdist = ''
         @autosync_enabled = false
     end
 
-    attr_reader :status
+    attr_reader :status, :status_color
 
     def load_team_config
         # construct a JSON-ish data structure
@@ -417,7 +435,7 @@ class ScoreboardApp < Patchbay
 
                 # number 
                 # timeouts "left" don't include the one currently in use, if any
-                'timeoutsLeft' => 1,
+                'timeoutsLeft' => 3,
                 'timeoutNowInUse' => false,
 
                 # penalty queues (for hockey)
@@ -438,7 +456,9 @@ class ScoreboardApp < Patchbay
 
                 'emptyNet' => false,
                 'delayedPenalty' => false,
-                'fontWidth' => 0
+                'possession' => false,
+                'fontWidth' => 0,
+                'status' => ''
             },
             {
                 'name' => 'RPI',
@@ -446,7 +466,7 @@ class ScoreboardApp < Patchbay
                 'bgcolor' => '#d40000',
                 'score' => 0,
                 'shotsOnGoal' => 0,
-                'timeoutsLeft' => 1,
+                'timeoutsLeft' => 3,
                 'timeoutNowInUse' => false,
                 'penalties' => {
                     'announcedQueue' => [],
@@ -457,7 +477,9 @@ class ScoreboardApp < Patchbay
                 ],
                 'emptyNet' => false,
                 'delayedPenalty' => false,
-                'fontWidth' => 0
+                'possession' => false,
+                'fontWidth' => 0,
+                'status' => ''
             }
         ]
     end
@@ -557,7 +579,7 @@ class ScoreboardApp < Patchbay
 
     put '/settings' do
         otlen = incoming_json['otlen'].to_i
-        if (otlen > 0) 
+        if (otlen >= 0) 
             @clock.overtime_length = otlen
         end
 
@@ -584,6 +606,15 @@ class ScoreboardApp < Patchbay
 
     put '/status' do
         @status = incoming_json['message']
+        @status_color = 'white'
+        render :json => ''
+    end
+
+    put '/downdist' do 
+        @downdist = incoming_json['message']
+        @status = @downdist
+        @status_color = (@status == 'FLAG') ? 'yellow' : 'white'
+        STDERR.puts @downdist
         render :json => ''
     end
 
@@ -829,7 +860,6 @@ end
 
 app = ScoreboardApp.new
 app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked.svg.erb')
-#app.view = ScoreboardView.new('clock_only.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3002) }
 
@@ -873,9 +903,16 @@ end
 
 dirty_level = 1
 
+def dump_to_file(x)
+    File.open("scbd_lastframe", "wb") do |f|
+        f.write(x)
+    end
+end
+
 while true
     # prepare next SVG frame
     data = app.view.render
+
     # build header with data length and global alpha
     header = [ data.length, app.view.galpha, dirty_level ].pack('LCC')
 
