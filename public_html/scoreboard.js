@@ -663,24 +663,10 @@ function getAutosync() {
     });
 }
 
-function getSettings() {
-    getJson('/settings', function(data) {
-        $("#otLengthCombo").val(data.otlen);
-        overtime_length = data.otlen;
-    }); 
-}
-
-function changeOtLength() {
-    overtime_length = $("#otLengthCombo").val();
-    putJson('/settings', { 'otlen' : overtime_length });
-    $('.teamControl').team().each( function(index) { $(this).putTeamData(); } );
-}
-
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
     getAutosync( );
-    getSettings( );
 
     $(".teamControl").buildTeamControl();
     // set up team URLs and load initial data
