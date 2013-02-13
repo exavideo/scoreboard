@@ -23,6 +23,8 @@ var autocompletePenalties = [];
 var clockState = { };
 var lastStopTimeElapsed = 0;
 var overtime_length = 5*60*10;
+var down = 1;
+var togo = 10;
 
 function getText(sourceurl, callback) {
     jQuery.ajax({
@@ -171,8 +173,15 @@ jQuery.fn.buildTeamControl = function() {
 
         $(elem).find("#lockControl").click(lockControl);
         $(elem).find("#unlockControl").click(unlockControl);
-        $(elem).find("#goal").click(goalScored);
+
+        $(elem).find("#plusOne").click(function() { addPoints.call(this, 1); });
+        $(elem).find("#plusTwo").click(function() { addPoints.call(this, 2); });
+        $(elem).find("#plusThree").click(function() { addPoints.call(this, 3); });
+        $(elem).find("#plusSix").click(function() { addPoints.call(this, 6); });
+
         $(elem).find("#shotOnGoal").click(shotTaken);
+        $(elem).find("#takeTimeout").click(timeoutTaken);  
+        $(elem).find("#possession").click(possessionChange);        
         $(elem).find("#minorPenalty").click(function() { newPenalty.call(this, 1200); });
         $(elem).find("#doubleMinorPenalty").click(function() { newPenalty.call(this, 2400); });
         $(elem).find("#majorPenalty").click(function() { newPenalty.call(this, 3000); });
@@ -192,7 +201,7 @@ jQuery.fn.buildTeamControl = function() {
 
         // and hockey
         $(elem).find("#emptyNet").click(emptyNet);
-        $(elem).find("#emptyNet").click(delayedPenalty);
+        $(elem).find("#delayedPenalty").click(delayedPenalty);
 
         $(elem).find("input,select").change(function() { $(this).team().putTeamData() });
 
@@ -558,6 +567,19 @@ function goalScored() {
     viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
 
+// addPoints
+// add points to a team's score
+function addPoints(points) {
+    $(this).team().find("#score").val(
+        intOrZero($(this).team().find("#score").val()) + points
+    );
+    $(this).team().putTeamData();
+    // trigger any kind of blinky goal animations (or whatever)
+    if (points >= 3) {
+        viewCommand({"goal_scored_by" : $(this).team().data('url')});
+    }
+}
+
 function shotTaken() {
     $(this).team().find("#shotsOnGoal").val(
         intOrZero($(this).team().find("#shotsOnGoal").val()) + 1
@@ -599,6 +621,28 @@ function timeout() {
 function clearTeamStatus() {
     $(this).team().find("#status").val("");
     $(this).team().putTeamData( );
+}
+
+function timeoutTaken() {
+    var tol = intOrZero($(this).team().find("#timeoutsLeft").val());
+    if (tol > 0) {
+        $(this).team().find("#timeoutsLeft").val(tol - 1);
+        $(this).team().putTeamData();
+        putJson('/status', { message : "TIMEOUT " + $(this).team().find("#name").val() });
+    }
+}
+
+function possessionChange() {
+    var this_poss = $(this).team().find("#possession");
+    if (this_poss.is(':checked')) {
+        $(".teamControl").each( function(index) {
+            var other_poss = $(this).find("#possession");
+            if (other_poss.get(0) !== this_poss.get(0)) {
+                other_poss.prop('checked', false);
+                $(this).putTeamData();
+            }
+        } );
+    }
 }
 
 // lockControl
@@ -752,4 +796,40 @@ $(document).ready(function() {
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
+
+    $("#down1").click( function() { down = 1; updateDD(); } );
+    $("#down2").click( function() { down = 2; updateDD(); } );
+    $("#down3").click( function() { down = 3; updateDD(); } );
+    $("#down4").click( function() { down = 4; updateDD(); } );
+    $("#nextDown").click( function() { if (down < 4) { down += 1; } updateDD(); } );
+    $("#firstAndTen").click( function() { down = 1; togo = 10; updateDD(); } );
+    $("#toGoG").click( function() { togo = -1; updateDD(); } );
+    $("#toGoI").click( function() { togo = 0; updateDD(); } );
+    $("#toGo1").click( function() { togo = 1; updateDD(); } );
+    $("#toGo2").click( function() { togo = 2; updateDD(); } );
+    $("#toGo3").click( function() { togo = 3; updateDD(); } );
+    $("#toGo4").click( function() { togo = 4; updateDD(); } );
+    $("#toGo5").click( function() { togo = 5; updateDD(); } );
+    $("#toGo6").click( function() { togo = 6; updateDD(); } );
+    $("#toGo7").click( function() { togo = 7; updateDD(); } );
+    $("#toGo8").click( function() { togo = 8; updateDD(); } );
+    $("#toGo9").click( function() { togo = 9; updateDD(); } );
+    $("#toGo10").click( function() { togo = 10; updateDD(); } );
+    $("#toGo11").click( function() { togo = 11; updateDD(); } );
+    $("#toGo12").click( function() { togo = 12; updateDD(); } );
+    $("#toGo13").click( function() { togo = 13; updateDD(); } );
+    $("#toGo14").click( function() { togo = 14; updateDD(); } );
+    $("#toGo15").click( function() { togo = 15; updateDD(); } );
+    $("#toGo16").click( function() { togo = 16; updateDD(); } );
+    $("#toGo17").click( function() { togo = 17; updateDD(); } );
+    $("#toGo18").click( function() { togo = 18; updateDD(); } );
+    $("#toGo19").click( function() { togo = 19; updateDD(); } );
+    $("#toGo20").click( function() { togo = 20; updateDD(); } );
+    $("#toGoMinus5").click( function() { if (togo > 5) { togo -= 5; } updateDD(); } );
+    $("#toGoPlus5").click( function() { togo += 5; updateDD(); } );
+    $("#toGoEnter").click( customToGo );
+    $("#showDD").click( showDD );
+    $("#clearDD").click( clearDD );
+    $("#flagDD").click( flagDD );
+
 });
