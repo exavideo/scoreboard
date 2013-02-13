@@ -24,6 +24,20 @@ var clockState = { };
 var lastStopTimeElapsed = 0;
 var overtime_length = 5*60*10;
 
+function getText(sourceurl, callback) {
+    jQuery.ajax({
+        url: sourceurl,
+        dataType: "text",
+        error: function(jqxhr, textStatus) {
+            console.log("Communication failure: " + textStatus);
+        },
+        success: function(data) {
+            callback(data);
+        }
+    });
+}
+
+
 function getJson(sourceurl, callback) {
     jQuery.ajax({
         url: sourceurl,
@@ -143,7 +157,7 @@ function updateClockTimeout( ) {
 }
 
 function updatePreviewTimeout( ) {
-    $("#preview object").removeAttr("data").attr("data", "/preview?" + new Date().getTime());
+    $('#preview #previewDiv').load('/preview svg');
     setTimeout(updatePreviewTimeout, 1000);
 }
 
@@ -166,6 +180,14 @@ jQuery.fn.buildTeamControl = function() {
         $(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
         $(elem).find("#editPenalties").click(editPenalties);
         $(elem).find("#emptyNet").click(emptyNet);
+
+
+        // generic team status stuff for soccer
+        $(elem).find("#yellowCard").click(yellowCard);
+        $(elem).find("#redCard").click(redCard);
+        $(elem).find("#substitution").click(substitution);
+        $(elem).find("#timeout").click(timeout);
+        $(elem).find("#clearStatus").click(clearTeamStatus);
 
         $(elem).find("input,select").change(function() { $(this).team().putTeamData() });
 
@@ -542,8 +564,34 @@ function shotTaken() {
 }
 
 function emptyNet() {
+    // what happened here????? it was tied in with penalties FIXME
     $(this).team().find("#status").val("EMPTY NET");
     $(this).team().putTeamData();
+}
+
+function yellowCard() {
+    $(this).team().find("#status").val("YELLOW CARD");
+    $(this).team().putTeamData( );
+}
+
+function redCard() {
+    $(this).team().find("#status").val("RED CARD");
+    $(this).team().putTeamData( );
+}
+
+function substitution() {
+    $(this).team().find("#status").val("SUBSTITUTION");
+    $(this).team().putTeamData( );
+}
+
+function timeout() {
+    $(this).team().find("#status").val("TIMEOUT");
+    $(this).team().putTeamData( );
+}
+
+function clearTeamStatus() {
+    $(this).team().find("#status").val("");
+    $(this).team().putTeamData( );
 }
 
 // lockControl
@@ -683,7 +731,7 @@ $(document).ready(function() {
 
     $("#startClock").click(startClock);
     $("#stopClock").click(stopClock);
-	$("#toggleClock").click(toggleClock);
+    $("#toggleClock").click(toggleClock);
     $("#upSec").click( function() { adjustClock.call(this, 1000); } );
     $("#dnSec").click( function() { adjustClock.call(this, -1000); } );
     $("#upTenth").click( function() { adjustClock.call(this, 100); } );
@@ -697,5 +745,4 @@ $(document).ready(function() {
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
-    $("#otLengthCombo").change(changeOtLength);
 });
