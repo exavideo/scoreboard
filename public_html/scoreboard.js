@@ -19,7 +19,41 @@
 
 
 "use strict";
-var autocompletePenalties = [];
+var autocompletePenalties = [
+	"Boarding",
+	"Butt-ending",
+	"Charging",
+	"Body Checking",
+	"Clipping",
+	"Cross Checking",
+	"Delay of Game",
+	"Diving",
+	"Elbowing",
+	"Hand Pass",
+	"Face Mask",
+	"Embellishment",
+	"Fighting",
+	"Head-butting",
+	"High-Sticking",
+	"Late Hit",
+	"Hit From Behind",
+	"Holding",
+	"Hooking",
+	"Instigating",
+	"Interference",
+	"Kicking",
+	"Kneeing",
+	"Illegal Player",
+	"Obstruction",
+	"Roughing",
+	"Slashing",
+	"Slew-Footing",
+	"Spearing",
+	"Spitting",
+	"Taunting",
+	"Tripping",
+	"Unsportsmanlike Conduct",
+];
 var clockState = { };
 var lastStopTimeElapsed = 0;
 var overtime_length = 5*60*10;
