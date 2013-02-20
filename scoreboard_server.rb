@@ -865,7 +865,7 @@ class ScoreboardView
 end
 
 app = ScoreboardApp.new
-app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked.svg.erb')
+app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked_ecac.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3002) }
 
@@ -874,6 +874,7 @@ Thread.new { app.run(:Host => '::', :Port => 3002) }
 Thread.new do
     begin
         sp = SerialPort.new('/dev/ttyUSB0', 19200)
+        log = File.new('/root/scoreboard_log', 'a')
         string = ''
         last_control = -1
         while true
@@ -890,12 +891,13 @@ Thread.new do
                         tenths = $1.to_i * 600 + $2.to_i * 10
                     end
 
-                    STDERR.puts "tenths: #{tenths}"
-
                     if tenths >= 0 and app.autosync_enabled
                         app.clock.reset_period_remaining(tenths)
                     end
                 end
+                timestamp = Time.now.to_s
+
+                log.puts "#{timestamp}: (#{byte.ord}) #{string.inspect}"
                 last_control = byte.ord
                 string = ''
             else
