@@ -712,7 +712,7 @@ jQuery.fn.unserializeInputsJson = function(data) {
 jQuery.fn.getTeamData = function() {
     var thiz = this; // javascript can be counter-intuitive...
     getJson($(this).data('url'), function(data) {
-        $(thiz).find("#lockableInputs").unserializeInputsJson(data);
+        $(thiz).unserializeInputsJson(data);
         // important to set roster before we unserialize penalties
         // else autocompletion might fail
         $(thiz).data("roster", data.autocompletePlayers);
@@ -723,7 +723,16 @@ jQuery.fn.getTeamData = function() {
 // putTeamData
 // Synchronize team data back to the server.
 jQuery.fn.putTeamData = function() {
-    var json = $(this).find("#lockableInputs").serializeInputsJson();
+	// Check for Score/SOG being blanked
+	// Reset value to 0 instead
+	if ($(this).find("#score").val() == 0) {
+		$(this).find("#score").val(0);
+	}
+	if ($(this).find("#shotsOnGoal").val() == 0) {
+		$(this).find("#shotsOnGoal").val(0);
+	}
+
+    var json = $(this).serializeInputsJson();
     json['penalties'] = $(this).penaltyDialog().serializePenaltiesJson();
     putJson($(this).data('url'), json);
 }
