@@ -21,14 +21,74 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 <html>
     <head>
         <title>Exaboard</title>
-        <link type="text/css" rel="stylesheet" href="css/scoreboardv2.css" />
         <link type="text/css" rel="stylesheet" href="css/blitzer/jquery-ui-1.10.0.custom.css" />
+		<link type="text/css" rel="stylesheet" href="css/scoreboard.css" />
         <script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
         <script type="text/javascript" src="js/jquery-ui-1.10.0.custom.min.js"></script>
         <script type="text/javascript" src="scoreboard.js"></script>
     </head>
     
     <body>
+		<div id="settings">
+			<div id="gameSettings" class="settingsBox">
+				<label class="settingInputs">Sport
+					<select name=gameType><!--are hard coded now, but will be pulled from json. Actually, I think I am going to change this to a jqueryui autocomplete-->
+						<option value="basketball">Basketball</option>
+						<option value="broomball">Broomball</option>
+						<option value="fieldhockey">Field Hockey</option>
+						<option value="football">Football</option>
+						<option value="hockey" selected="selected">Hockey</option>
+						<option value="soccer">Soccer</option>
+						<option value="lacrosse">Lacrosse</option> 
+					</select>
+				</label>
+				<label class="settingInputs">Periods
+					<input type="text" class="spinbox" id="periodSetting"></input>
+				</label>
+				<label class="settingInputs">Period Length
+					<input type="text" id="periodLength"></input>
+				</label>
+				<label class="settingInputs">Overtime Periods
+					<input type="text" class="spinbox" id="otPeriodSetting"></input>
+				</label>
+				<label class="settingInputs">Overtime Length
+					<input type="text" id="otPeriodLength"></input>
+				</label>
+				<label class="settingInputs">Shootout
+					<input type="checkbox" id="shootoutSetting"></input>
+				</label>
+
+			</div>
+			<div id=homeTeamSettings" class="settingsBox"></div>
+			<div id=awayTeamSettings" class="settingsBox"></div>
+			<div id=teamSettingsProto" class="settingsBox">
+				<label class="settingInputs">Team
+					<select name=teamSelect>
+						<option value="Rensselaer">Rensselaer</option>
+						<option value="Union">Union</option>
+					</select>
+				</label>
+				<label>Team
+					<input type="text" id="name"></input>
+				</label>
+				<label>Abbreviation
+					<input type="text" id="abbrev"></input>
+				</label>
+				<label>Primary Color
+					<input type="text" id="bgcolor"></input>
+				</label>
+				<label>Secondary Color
+					<input type="text" id="fgcolor"></input>
+				</label>
+				<label>Nickname
+					<input type="text" id="name"></input>
+				</label>
+				<label>Logo
+					<input type="text" id="name"></input>
+				</label>
+			</div>
+			<button id="hideSettings">Hide Settings</button>
+		</div>
         <div id="main">
             <!-- global state/control -->
             <div style="display: inline-block; border: 5px solid #800;"><span style="font-size: 50pt; color: #800000;">Union</span>
@@ -171,25 +231,11 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                         <button id="deletePenalty">Delete</button>
                     </li>
                 </ul>
-                <div style="clear: both"></div>
-                <div>
-                    <button id="clearAllPenalties">Remove All</button>
-                </div>
+			</div>
+
             </div>
         </div>
         </div>
     </body>
 
 </html>
-
-<!--
-<select>
-	<option value="basketball">Basketball</option>
-	<option value="broomball">Broomball</option>
-	<option value="fieldhockey">Field Hockey</option>
-	<option value="football">Football</option>
-	<option value="hockey" selected="selected">Hockey</option>
-	<option value="soccer">Soccer</option>
-	<option value="lacrosse">Lacrosse</option> 
-</select>
--->

@@ -820,6 +820,11 @@ $(document).ready(function() {
         modal: true,
         resizable: false,
     });
+	$("INPUT.spinbox").spinner({
+		min:0,
+		max:100,
+	});
+	$("#hideSettings").click($("#settings").hide());
 
     $("#startClock").click(startClock);
     $("#stopClock").click(stopClock);
