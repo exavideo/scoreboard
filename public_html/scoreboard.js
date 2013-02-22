@@ -293,6 +293,7 @@ jQuery.fn.newPenaltyDiv = function() {
 
     return penaltyDiv;
 }
+	
 
 // newPenalty
 // add a penalty to the team's penalty queue
@@ -802,7 +803,6 @@ function getAutosync() {
         }
     });
 }
-
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
@@ -824,7 +824,9 @@ $(document).ready(function() {
 		min:0,
 		max:100,
 	});
-	$("#hideSettings").click($("#settings").hide());
+	$("#toggleSettings").click(function() {
+		$("#settings").toggle(1000);
+	});
 
     $("#startClock").click(startClock);
     $("#stopClock").click(stopClock);

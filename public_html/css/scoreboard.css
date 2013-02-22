@@ -1,0 +1,187 @@
+/*
+ * Copyright 2013 Exavideo LLC.
+ * 
+ * This file is part of Exaboard.
+ * 
+ * Exaboard is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Exaboard is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
+*/
+ 
+@charset "utf-8";
+@font-face {
+    font-family: gothamNarrow;
+    src: url('GothamNarrow.otf');
+}
+body {
+    background: #aaa url(ExavideoSemitransparent.png) no-repeat;
+    background-position: bottom right;
+    text-align: center;
+    font-family:gothamNarrow;
+}
+.penalty_queue {
+    float: left;
+    width: 300px;
+}
+.penaltyData input {
+    width: 100%;
+}
+.penalty_list {
+    padding: 10px;
+    margin: 5px;
+    background-color: #aaa;
+    list-style-type: none;
+}
+.penalty_list li {
+    margin: 5px;
+    padding: 5px;
+    background-color: #888;
+    color: white;
+}
+.teamControl {
+    display: inline-block;
+    width: 18em;
+}
+#clockControl {
+    display: inline-block;
+}
+.bttn {
+    display: inline-block;
+    border: 2px solid white;
+    padding: 4px;
+    margin: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    background: #bbb;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.bttn:hover {
+    border: 2px solid black;
+	color: #fff;
+    background: #999;
+    cursor: pointer;
+}
+.bttn:active {
+    border: 2px solid black;
+    background: #666;
+    cursor: pointer;
+}
+#penaltyBox .bttn {
+    width: 40%;
+}
+#announceControl .bttn {
+    width: 18%;
+}
+#announce:hover {
+    background: yellow;
+}
+#status:hover {
+    background: #eee;
+}
+#toggleClock {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#up {
+    width: 46%;
+    padding: 10px;
+}
+#down {
+    width: 46%;
+    padding: 10px;
+}
+.control {
+    border: 1px dotted blue;
+    padding: 3px;
+    margin: 3px;
+}
+.innerbox {
+    border: solid black 2px;
+    margin: 3px;
+    padding: 4px;
+    background: #ddd;
+}
+#main {
+    padding: 10px;
+    margin: 0 auto;
+    width: 1200px;
+    background: #ccc;
+    border: 1px solid black;
+}
+#preview {
+    margin: 0 0 0 -200px;
+}
+.ck-bttn {
+    margin:4px;
+    border:2px solid #fff;
+    display: inline-block;
+    margin: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    background: #bbb;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.ck-bttn:hover {
+    background:#999;
+    color:#fff;
+    border:2px solid #000;
+}
+.ck-bttn:active {
+    background:#666;
+}
+.ck-bttn label {
+    float:left;
+    min-width:4.0em;
+}
+.ck-bttn label span {
+    text-align:center;
+    padding:4px 6px;
+    display:block;
+}
+.ck-bttn label input {
+    position:absolute;
+    top:-20px;
+}
+.ck-bttn input:checked + span {
+    background:#c60;
+    color:#fff;
+}
+#settings {
+    padding: 10px;
+    margin: 10px auto;
+    width: auto;
+    background: #eee;
+    border: 1px solid #f00;
+}
+.settingsBox{
+	width:225px;
+	border: 1px solid orange;
+	display:inline-block;
+}
+.settingInputs{
+	display:block;
+}
+#settings input[type="text"] {
+	text-align:right;
+	width:4em;
+}
+#settings label{
+	float:right;
+}
