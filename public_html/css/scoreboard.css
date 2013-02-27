@@ -87,9 +87,11 @@ body {
     width: 18%;
 }
 #announce:hover {
+	color: black;
     background: yellow;
 }
 #status:hover {
+	color: black;
     background: #eee;
 }
 #toggleClock {
@@ -188,4 +190,11 @@ body {
 	float:right;
 }
 #toggleSettings{
+}
+.teamControlBox {
+	display: inline-block;
+	width: 300px;
+	height: 350px;
+	background: #444;
+	border: 2px solid black;
 }
