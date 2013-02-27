@@ -26,7 +26,8 @@ body {
     background: #aaa url(ExavideoSemitransparent.png) no-repeat;
     background-position: bottom right;
     text-align: center;
-    font-family:gothamNarrow;
+    font-family: gothamNarrow;
+	overflow-y: scroll;
 }
 .penalty_queue {
     float: left;
@@ -166,6 +167,7 @@ body {
 #settings {
     padding: 10px;
     margin: 10px auto;
+	margin-top: 0;
     width: auto;
     background: #eee;
     border: 1px solid #f00;
@@ -184,4 +186,6 @@ body {
 }
 #settings label{
 	float:right;
+}
+#toggleSettings{
 }
