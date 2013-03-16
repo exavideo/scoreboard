@@ -111,7 +111,7 @@ body {
     padding: 3px;
     margin: 3px;
 }
-.innerbox {
+.innerBox {
     border: solid black 2px;
     margin: 3px;
     padding: 4px;
@@ -175,14 +175,15 @@ body {
     border: 1px solid #f00;
 }
 .settingsBox{
-	width:225px;
-	border: 1px solid orange;
-	display:inline-block;
+	border: 3px solid orange;
 }
 .settingInputs{
 	display:block;
 }
-#settings input[type="text"] {
+.settingInputs input{
+	align:center;
+}
+#teamSettings input[type="text"], #gameSettings input[type="text"] {
 	text-align:right;
 	width:4em;
 }
@@ -194,7 +195,7 @@ body {
 .teamControlBox {
 	display: inline-block;
 	width: 300px;
-	height: 350px;
-	background: #444;
+	height: auto;
+	background: #aaa;
 	border: 2px solid black;
 }

@@ -24,68 +24,12 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.10.1.custom.min.css" />
 		<link type="text/css" rel="stylesheet" href="css/scoreboard.css" />
         <script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
-        <script type="text/javascript" src="js/jquery-ui-1.10.0.custom.min.js"></script>
+        <script type="text/javascript" src="js/jquery-ui-1.10.1.custom.min.js"></script>
         <script type="text/javascript" src="js/scoreboard.js"></script>
     </head>
     
     <body>
 	<!-- PRE-GAME SETTINGS PANEL -->
-		<div id="settings">
-			<div id="gameSettings" class="settingsBox">
-				<label class="settingInputs">Sport
-					<select name=gameType><!--are hard coded now, but will be pulled from json. Actually, I think I am going to change this to a jqueryui autocomplete as well-->
-						<option value="basketball">Basketball</option>
-						<option value="broomball">Broomball</option>
-						<option value="fieldhockey">Field Hockey</option>
-						<option value="football">Football</option>
-						<option value="hockey" selected="selected">Hockey</option>
-						<option value="soccer">Soccer</option>
-						<option value="lacrosse">Lacrosse</option> 
-					</select>
-				</label>
-				<label class="settingInputs">Periods
-					<input type="text" class="spinbox" id="periodSetting"></input>
-				</label>
-				<label class="settingInputs">Period Length
-					<input type="text" id="periodLength"></input>
-				</label>
-				<label class="settingInputs">Overtime Periods
-					<input type="text" class="spinbox" id="otPeriodSetting"></input>
-				</label>
-				<label class="settingInputs">Overtime Length
-					<input type="text" id="otPeriodLength"></input>
-				</label>
-				<label class="settingInputs">Shootout
-					<input type="checkbox" id="shootoutSetting"></input>
-				</label>
-			</div>
-			
-			<div id=homeTeamSettings" class="settingsBox"></div>
-			<div id=awayTeamSettings" class="settingsBox"></div>
-			<div id=teamSettingsProto" class="settingsBox">
-				<label class="settingInputs">School
-					<input type="text" id="teamSelect"></input>
-				</label>
-				<label>Team
-					<input type="text" id="name"></input>
-				</label>
-				<label>Abbreviation
-					<input type="text" id="abbrev"></input>
-				</label>
-				<label>Primary Color
-					<input type="text" id="bgcolor"></input>
-				</label>
-				<label>Secondary Color
-					<input type="text" id="fgcolor"></input>
-				</label>
-				<label>Nickname
-					<input type="text" id="name"></input>
-				</label>
-				<label>Logo
-					<input type="text" id="name"></input>
-				</label>
-			</div>
-		</div>	
 	<!-- EOF PRE-GAME SETTINGS PANEL -->
 	<!-- SCOREBOARD PANEL -->
         <div id="main">
@@ -100,6 +44,38 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
+				<div id="gameSettings" class="innerBox settingsBox" style="display:list-item">
+					<label class="settingInputs">Sport
+						<select name="gameType" disabled="disabled" ><!--are hard coded now, but will be pulled from json-->
+							<option value="basketball">Basketball</option>
+							<option value="broomball">Broomball</option>
+							<option value="fieldhockey">Field Hockey</option>
+							<option value="football">Football</option>
+							<option value="hockey" selected="selected">Hockey</option>
+							<option value="soccer">Soccer</option>
+							<option value="lacrosse">Lacrosse</option> 
+						</select>
+					</label>
+					<label class="settingInputs">Periods
+						<input type="text" disabled="disabled" id="periodSetting"></input>
+					</label>
+					<label class="settingInputs">Period Length
+						<input type="text" disabled="disabled" id="periodLength"></input>
+					</label>
+					<label class="settingInputs">Timeouts
+						<input type="text" disabled="disabled" id="timeouts"></input>
+					</label>
+					<label class="settingInputs">Overtime Periods
+						<input type="text" disabled="disabled" disabled="disabled" id="otPeriodSetting"></input>
+					</label>
+					<label class="settingInputs">Overtime Length
+						<input type="text" disabled="disabled" id="otPeriodLength"></input>
+					</label>
+					<label class="settingInputs">Shootout
+						<input type="checkbox" disabled="disabled" id="shootoutSetting"></input>
+					</label>
+				</div>
+
 				<!-- Settings panel toggle button -->
 				<div id="toggleSettings" class="bttn" style="diplay:list-item; width: 7em;" value="Test">
 					<span id="toggleSettingsText">Hide Settings</span>
@@ -128,7 +104,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 							<input type="checkbox" id="autoSync">Enable Auto-Sync</input>
 						</div>
 					</label>
-					<div class="innerbox" id="clockSet">Time
+					<div class="innerBox" id="clockSet">Time
 						<input id="time_str" type="text" style="width:8em" />Period
 						<input id="period" type="text" style="width:3em" />
 						<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px;"
@@ -162,42 +138,72 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         </div>
         <div style="display: none" id="teamProto">
-            <div class="innerbox" id="scoreSet">Score
+			<div id="teamSettings" class="innerBox settingsBox">
+				<label class="settingInputs">School
+					<input type="text" id="teamSelect" onclick="this.select();" ></input>
+				</label>
+				<label class="settingInputs">Team
+					<input type="text" id="name"></input>
+				</label>
+				<label class="settingInputs">Abbreviation
+					<input type="text" disabled="disabled" id="abbrev"></input>
+				</label>
+				<label class="settingInputs">Primary Color
+					<input type="text" id="bgcolor"></input>
+				</label>
+				<label class="settingInputs">Secondary Color
+					<input type="text" id="fgcolor"></input>
+				</label>
+				<label class="settingInputs">Nickname
+					<input type="text" disabled="disabled" id="nickname"></input>
+				</label>
+				<label class="settingInputs">Logo
+					<input type="text" disabled="disabled" id="logo"></input>
+				</label>
+			</div>
+            <div class="innerBox" id="scoreSet">Score
                 <input type="text" id="score" style="width: 5em; text-align: right" onclick="this.select();"/>
                 <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"
                 id="plusOne" class="bttn">Goal</div>
             </div>
-			<div class="innerbox" id="sogSet">&nbsp;&nbsp;SOG
+			<div class="innerBox" id="sogSet">&nbsp;&nbsp;SOG
                 <input type="text" id="shotsOnGoal" style="width: 5em; text-align: right" onclick="this.select();"/>
                 <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"
                 id="shotOnGoal" class="bttn">+1</div>
             </div>
             <div class="ck-bttn">
                 <label>
-                    <input type="checkbox" id="emptyNet"><span>Empty Net</span>
+                    <input type="checkbox" id="emptyNet" value="EMPTY NET" ><span>Empty Net</span>
 
                     </input>
                 </label>
             </div>
             <div class="ck-bttn">
                 <label>
-                    <input type="checkbox" id="delayedPenalty"><span>Delayed Penalty</span>
+                    <input type="checkbox" id="delayedPenalty_" value="DELAYED PENALTY"><span>Delayed Penalty</span>
 
                     </input>
                 </label>
             </div>
             <div class="ck-bttn">
                 <label>
-                    <input type="checkbox" id="timeout"><span>Timeout</span>
+                    <input type="checkbox" id="timeout_" value="TIMEOUT"><span>Timeout</span>
+
+                    </input>
+                </label>
+            </div>
+           <div class="ck-bttn"  style="display:none">
+                <label>
+                    <input type="text" id="status" value=""><span>Status</span>
 
                     </input>
                 </label>
             </div>
             <br/>
-            <div class="innerbox" id="penaltyBox">
+            <div class="innerBox" id="penaltyBox">
                 <div class="bttn" id="minorPenalty">Minor Penalty</div>
                 <div class="bttn" id="majorPenalty">Major Penalty</div>
-                <div class="bttn" id="clearPenalties" onclick="alert('Are you Sure?')"
+                <div class="bttn" id="clearPenalties" onclick="alert('Are you Sure? This is a dumb alert because the penalties get deleted regardless. FIX ME!')"
                 style="border: 2px solid red;">Clear Penalties</div>
                 <div class="bttn" id="editPenalties">Edit Penalties</div>
             </div>
