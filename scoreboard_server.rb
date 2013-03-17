@@ -872,7 +872,7 @@ Thread.new { app.run(:Host => '::', :Port => 3002) }
 def start_rs232_sync_thread(app)
     Thread.new do
         begin
-            sp = SerialPort.new('/dev/ttyUSB0', 19200)
+            sp = SerialPort.new('/dev/ttyS0', 19200)
             string = ''
             last_control = -1
             while true
@@ -944,7 +944,7 @@ def start_drycontact_sync_thread(app)
     end
 end
 
-start_drycontact_sync_thread(app)
+start_rs232_sync_thread(app)
 
 dirty_level = 1
 
