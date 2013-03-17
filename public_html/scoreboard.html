@@ -44,7 +44,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
-				<div id="gameSettings" class="innerBox settingsBox" style="display:list-item">
+				<div id="gameSettings" class="innerBox settingsBox" style="display:list-item; list-style:none;">
 					<label class="settingInputs">Sport
 						<select name="gameType" disabled="disabled" ><!--are hard coded now, but will be pulled from json-->
 							<option value="basketball">Basketball</option>
@@ -142,11 +142,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 				<label class="settingInputs">School
 					<input type="text" id="teamSelect" onclick="this.select();" ></input>
 				</label>
-				<label class="settingInputs">Team
-					<input type="text" id="name"></input>
-				</label>
 				<label class="settingInputs">Abbreviation
-					<input type="text" disabled="disabled" id="abbrev"></input>
+					<input type="text" id="name"></input>
 				</label>
 				<label class="settingInputs">Primary Color
 					<input type="text" id="bgcolor"></input>
@@ -173,28 +170,35 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             </div>
             <div class="ck-bttn">
                 <label>
-                    <input type="checkbox" id="emptyNet" value="EMPTY NET" ><span>Empty Net</span>
+                    <input type="checkbox" id="emptyNet_" name="EMPTY NET" ><span>Empty Net</span>
 
                     </input>
                 </label>
             </div>
             <div class="ck-bttn">
                 <label>
-                    <input type="checkbox" id="delayedPenalty_" value="DELAYED PENALTY"><span>Delayed Penalty</span>
+                    <input type="checkbox" id="delayedPenalty_" name="DELAYED PENALTY"><span>Delayed Penalty</span>
 
                     </input>
                 </label>
             </div>
             <div class="ck-bttn">
                 <label>
-                    <input type="checkbox" id="timeout_" value="TIMEOUT"><span>Timeout</span>
+                    <input type="checkbox" id="timeout_" name="TIMEOUT"><span>Timeout</span>
 
                     </input>
                 </label>
             </div>
-           <div class="ck-bttn"  style="display:none">
+           <div class=""  style="display:none">
                 <label>
                     <input type="text" id="status" value=""><span>Status</span>
+
+                    </input>
+                </label>
+            </div>
+            <div class="ck-bttn">
+                <label>
+                    <input type="button" id="clearStatus_" name=""><span>Clear</span>
 
                     </input>
                 </label>
