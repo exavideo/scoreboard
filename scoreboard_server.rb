@@ -782,7 +782,6 @@ class ScoreboardView
         @announce_text_dissolve = LinearAnimation.new
         @global_dissolve = LinearAnimation.new
 
-        @global_dissolve.cut_in # hack
         @announce_text_dissolve.cut_in
 
         @animations = [ @away_goal_flasher, @home_goal_flasher, 
