@@ -41,6 +41,7 @@ end
 CLOCK_HOCKEY_REGULAR_SEASON = ClockSettings.new(minutes(20), minutes(5), 3)
 CLOCK_HOCKEY_POSTSEASON = ClockSettings.new(minutes(20), minutes(20), 3)
 CLOCK_FOOTBALL = ClockSettings.new(minutes(15), 0, 4)
+CLOCK_LACROSSE = ClockSettings.new(minutes(15), minutes(4), 4)
 
 # FIXME: need a way to change this more easily than manually editing this file
 CLOCK_MODE = CLOCK_HOCKEY_REGULAR_SEASON
@@ -312,7 +313,6 @@ class AnnounceHelper
     end
 
     def next
-        STDERR.puts "going to next announce!"
         @frames = 0
         if @announce.length > 0
             @announce.shift
@@ -830,7 +830,11 @@ class ScoreboardView
             ani.frame_advance
         end
 
-        announce.frames += 1
+        if announce.is_up
+            announce.frames += 1
+        else
+            announce.frames = 0
+        end
 
         if announce.frames == 90
             announce.next
