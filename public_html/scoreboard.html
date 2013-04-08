@@ -81,7 +81,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 					<span id="toggleSettingsText">Hide Settings</span>
 				</div>
 				<!-- Clock Control Panel -->
-				<div id="clockControl" class="control">
+				<div id="clockControl" class="control basketball broomball football hockey lacrosse soccer volleyball">
 					<span style="font-size: 36pt; font-weight:bold;" id="clock">31:33.7</span>
 
 					<div style="text-align:right; float: right; padding-right: 70px; padding-left: 0;">
@@ -158,33 +158,66 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 					<input type="text" disabled="disabled" id="logo"></input>
 				</label>
 			</div>
-            <div class="innerBox" id="scoreSet">Score
+            <div class="innerBox baseball basketball broomball football hockey lacrosse soccer volleyball" id="scoreSet">Score
                 <input type="text" id="score" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"
-                id="plusOne" class="bttn">Goal</div>
-            </div>
-			<div class="innerBox" id="sogSet">&nbsp;&nbsp;SOG
+                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="plusOne" class="bttn lacrosse soccer hockey ">Goal</div>
+				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"id="plusOne" class="bttn baseball basketball football volleyball ">+1</div>
+				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"id="plusTwo" class="bttn basketball football">+2</div>
+				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"id="plusThree" class="bttn basketball football">+3</div>
+				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"id="plusSix" class="bttn football">+6</div>
+
+                </div>
+			<div class="innerBox broomball hockey lacrosse soccer" id="sogSet">SOG
                 <input type="text" id="shotsOnGoal" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"
-                id="shotOnGoal" class="bttn">+1</div>
+                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="sogPlusOne" class="bttn">+1</div>
             </div>
-            <div class="ck-bttn">
+            <div class="innerBox lacrosse" id="gbSet">Ground Balls
+                <input type="text" id="groundBalls" style="width: 5em; text-align: right" onclick="this.select();"/>
+                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="gbPlusOne" class="bttn">+1</div>
+            </div>
+            <div class="innerBox baseball" id="hitsSet">Hits
+                <input type="text" id="hits" style="width: 5em; text-align: right" onclick="this.select();"/>
+                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="hitsPlusOne" class="bttn">+1</div>
+            </div>
+            <div class="innerBox baseball" id="errorsSet">Errors
+                <input type="text" id="errors" style="width: 5em; text-align: right" onclick="this.select();"/>
+                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="errorsPlusOne" class="bttn">+1</div>
+            </div>
+            <div class="innerBox basketball" id="foulsSet">Fouls
+                <input type="text" id="fouls" style="width: 5em; text-align: right" onclick="this.select();"/>
+                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="foulsPlusOne" class="bttn">+1</div>
+            </div>
+            <div class="ck-bttn soccer">
                 <label>
-                    <input type="checkbox" id="emptyNet_" name="EMPTY NET" ><span>Empty Net</span>
+                    <input type="checkbox" id="yellowCard" name="Yellow Card" ><span>Yellow Card</span>
 
                     </input>
                 </label>
             </div>
-            <div class="ck-bttn">
+            <div class="ck-bttn soccer">
                 <label>
-                    <input type="checkbox" id="delayedPenalty_" name="DELAYED PENALTY"><span>Delayed Penalty</span>
+                    <input type="checkbox" id="redCard_" name="Red Card" ><span>Red Card</span>
 
                     </input>
                 </label>
             </div>
-            <div class="ck-bttn">
+            <div class="ck-bttn lacrosse hockey">
                 <label>
-                    <input type="checkbox" id="timeout_" name="TIMEOUT"><span>Timeout</span>
+                    <input type="checkbox" id="emptyNet_" name="Empty Net" ><span>Empty Net</span>
+
+                    </input>
+                </label>
+            </div>
+            <div class="ck-bttn lacrosse hockey">
+                <label>
+                    <input type="checkbox" id="delayedPenalty_" name="Delayed Penalty"><span>Delayed Penalty</span>
+
+                    </input>
+                </label>
+            </div>
+            <div class="ck-bttn football hockey lacrosse soccer volleyball ">
+                <label>
+                    <input type="checkbox" id="timeout_" name="Timeout"><span>Timeout</span>
 
                     </input>
                 </label>
@@ -196,7 +229,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                     </input>
                 </label>
             </div>
-            <div class="ck-bttn">
+            <div class="ck-bttn baseball basketball football hocke lacrosse soccer volleyball">
                 <label>
                     <input type="button" id="clearStatus_" name=""><span>Clear</span>
 
@@ -204,10 +237,10 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 </label>
             </div>
             <br/>
-            <div class="innerBox" id="penaltyBox">
+            <div class="innerBox hockey lacrosse" id="penaltyBox">
                 <div class="bttn" id="minorPenalty">Minor Penalty</div>
                 <div class="bttn" id="majorPenalty">Major Penalty</div>
-                <div class="bttn" id="clearPenalties" onclick="alert('Are you Sure? This is a dumb alert because the penalties get deleted regardless. FIX ME!')"
+                <div class="bttn" id="clearPenalties" onclick="alert('Make a useful confirm alert. this one is pointless')"
                 style="border: 2px solid red;">Clear Penalties</div>
                 <div class="bttn" id="editPenalties">Edit Penalties</div>
             </div>

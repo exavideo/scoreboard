@@ -822,7 +822,10 @@ $(document).ready(function() {
         modal: true,
         resizable: false,
     });
-
+    
+    $(".baseball, .basketball, .football, .hockey, .soccer, .lacrosse, .broomball, .volleyball").hide();
+    
+    //create function and move when done
 	//toggle settings
 	$("#toggleSettings").click(function() {
 		$("#gameSettings").toggle("blind", 1000);
