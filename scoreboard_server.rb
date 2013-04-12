@@ -430,8 +430,20 @@ class ScoreboardApp < Patchbay
     def initialize
         super
 
+        @DATAFILE_NAME='scoreboard_state.dat'
         @clock = GameClock.new(CLOCK_MODE)
-        @teams = load_team_config
+        if File.exists?(@DATAFILE_NAME)
+            begin
+                @teams = load_data
+            rescue
+                STDERR.puts "failed to load config, initializing it..."
+                @teams = initialize_team_config
+                save_data
+            end
+        else
+            @teams = initialize_team_config
+            save_data
+        end
         @announces = []
         @status = ''
         @status_color = 'white'
@@ -441,7 +453,7 @@ class ScoreboardApp < Patchbay
 
     attr_reader :status, :status_color
 
-    def load_team_config
+    def initialize_team_config
         # construct a JSON-ish data structure
         [
             {
@@ -512,6 +524,7 @@ class ScoreboardApp < Patchbay
 
         if id == 0 or id == 1
             Thread.exclusive { @teams[id].merge!(incoming_json) }
+            save_data
             render :json => ''
         else
             render :json => '', :status => 404
@@ -660,6 +673,18 @@ protected
         end
 
         params[:incoming_json]
+    end
+
+    def save_data
+        File.open(@DATAFILE_NAME, 'w') do |f|
+            f.write @teams.to_json
+        end
+    end
+
+    def load_data
+        File.open(@DATAFILE_NAME, 'r') do |f|
+            JSON.parse f.read
+        end
     end
 
     def command_queue

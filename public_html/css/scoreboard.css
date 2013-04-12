@@ -23,8 +23,7 @@
     src: url('GothamNarrow.otf');
 }
 body {
-    background: #aaa url(ExavideoSemitransparent.png) no-repeat;
-    background-position: bottom right;
+    background: #aaa url(ExavideoSemitransparent.png) repeat;
     text-align: center;
     font-family: gothamNarrow;
 	overflow-y: scroll;
@@ -80,7 +79,7 @@ body {
     background: #666;
     cursor: pointer;
 }
-#penaltyBox .bttn {
+.specialFunctionBox .bttn {
     width: 40%;
 }
 #announceControl .bttn {
@@ -105,11 +104,6 @@ body {
 #down {
     width: 46%;
     padding: 10px;
-}
-.control {
-    border: 1px dotted blue;
-    padding: 3px;
-    margin: 3px;
 }
 .innerBox {
     border: solid black 2px;

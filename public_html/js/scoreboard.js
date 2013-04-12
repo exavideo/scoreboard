@@ -221,19 +221,8 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#clearPenalties").click(clearPenalties);
         $(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
         $(elem).find("#editPenalties").click(editPenalties);
-
-        //change these to get .statusBttn class (or get checkboxes) and send id 
-        $(elem).find("#timeout_").click(function(){statusChange(this, $(elem)); });
-
-        // some specific stuff for soccer
-        $(elem).find("#yellowCard").click(function(){statusChange(this, $(elem)); });
-        $(elem).find("#redCard").click(function(){statusChange(this, $(elem)); });
-        $(elem).find("#substitution").click(function(){statusChange(this, $(elem)); });
-        $(elem).find("#clearStatus_").click(function(){statusChange(this, $(elem)); });
-
-        // and hockey
-        $(elem).find("#emptyNet_").click(function(){statusChange(this, $(elem)); });
-        $(elem).find("#delayedPenalty_").click(function(){statusChange(this, $(elem)); });
+		
+        $(elem).find(".statusBttn").click(function(){statusChange(this, $(elem)); });
 		
         $(elem).find("input,select").blur(function() { $(this).team().putTeamData() });
 
@@ -611,61 +600,27 @@ function addPoints(points) {
     viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
 
-
 function shotTaken() {
     $(this).team().find("#shotsOnGoal").val(
         intOrZero($(this).team().find("#shotsOnGoal").val()) + 1
     );
     $(this).team().putTeamData();
 }
-//Need to eliminate all these specific functions
-
 function statusChange(thiz, team){
-    if ($(thiz).is(":checked")){
-		$(thiz).team().find("#status").val($(thiz).attr("name"));
+	if ($(thiz).attr("status") == "" ){
+		$(thiz).team().find("#status").val("");
+		$(team).find(".statusBttn:checked").attr("checked", false);
+	}
+	if ($(thiz).is(":checked")){
+		$(thiz).team().find("#status").val($(thiz).attr("status"));
+		$(thiz).team().find("#status").val().toUpperCase();
+		
     }else{
         $(thiz).team().find("#status").val("");
-        $(team).find("#status").val($(":checked:last-of-type").attr("name"));
+		$(thiz).team().find("#status").val($(thiz).team().find(":checked").attr("status"));
         
     }
 	$(thiz).team().putTeamData();
-}
-
-/*
-function emptyNet() {
-   // once upon a time, this was tied in with penalties. FIXME
-   // $(this).team().find("#status").val("EMPTY NET");
-    $(this).team().putTeamData();
-}
-
-function delayedPenalty() {
-   // $(this).team().find("#status").val("DELAYED PENALTY");
-    $(this).team().putTeamData();
-}
-
-function yellowCard() {
-    $(this).team().find("#status").val("YELLOW CARD");
-    $(this).team().putTeamData( );
-}
-
-function redCard() {
-    $(this).team().find("#status").val("RED CARD");
-    $(this).team().putTeamData( );
-}
-
-function substitution() {
-    $(this).team().find("#status").val("SUBSTITUTION");
-    $(this).team().putTeamData( );
-}
-
-//function timeout() {
-    //$(this).team().find("#status").val("TIMEOUT");
- //   $(this).team().putTeamData( );
-//}
-
-function clearTeamStatus() {
-    $(this).team().find("#status").val("");
-    $(this).team().putTeamData( );
 }
 
 /*function timeoutTaken() {
@@ -823,7 +778,8 @@ $(document).ready(function() {
         resizable: false,
     });
     
-    $(".baseball, .basketball, .football, .hockey, .soccer, .lacrosse, .broomball, .volleyball").hide();
+    //$(".baseball, .basketball, .football, .hockey, .soccer, .lacrosse, .broomball, .volleyball").hide();
+	//$(".hockey").show();
     
     //create function and move when done
 	//toggle settings
@@ -917,21 +873,7 @@ $(document).ready(function() {
     $("#toGo3").click( function() { togo = 3; updateDD(); } );
     $("#toGo4").click( function() { togo = 4; updateDD(); } );
     $("#toGo5").click( function() { togo = 5; updateDD(); } );
-    $("#toGo6").click( function() { togo = 6; updateDD(); } );
-    $("#toGo7").click( function() { togo = 7; updateDD(); } );
-    $("#toGo8").click( function() { togo = 8; updateDD(); } );
-    $("#toGo9").click( function() { togo = 9; updateDD(); } );
-    $("#toGo10").click( function() { togo = 10; updateDD(); } );
-    $("#toGo11").click( function() { togo = 11; updateDD(); } );
-    $("#toGo12").click( function() { togo = 12; updateDD(); } );
-    $("#toGo13").click( function() { togo = 13; updateDD(); } );
-    $("#toGo14").click( function() { togo = 14; updateDD(); } );
-    $("#toGo15").click( function() { togo = 15; updateDD(); } );
-    $("#toGo16").click( function() { togo = 16; updateDD(); } );
-    $("#toGo17").click( function() { togo = 17; updateDD(); } );
-    $("#toGo18").click( function() { togo = 18; updateDD(); } );
-    $("#toGo19").click( function() { togo = 19; updateDD(); } );
-    $("#toGo20").click( function() { togo = 20; updateDD(); } );
+
     $("#toGoMinus5").click( function() { if (togo > 5) { togo -= 5; } updateDD(); } );
     $("#toGoPlus5").click( function() { togo += 5; updateDD(); } );
     $("#toGoEnter").click( customToGo );
