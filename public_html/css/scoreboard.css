@@ -58,9 +58,7 @@ body {
     display: inline-block;
     border: 2px solid white;
     padding: 4px;
-    margin: 1px;
-    margin-top: 3px;
-    margin-bottom: 3px;
+    margin: 3px 1px;
     background: #bbb;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -79,8 +77,30 @@ body {
     background: #666;
     cursor: pointer;
 }
-.specialFunctionBox .bttn {
+#penaltyBox .bttn {
     width: 40%;
+}
+.bttn.downs{
+	width:19.3%;
+	margin: 3px 0px;
+}
+.bttn.ytg{
+	width: 5.7%;
+	margin: 3px 0px;
+	padding: 4px 2px;
+}
+.bttn.addSubYTG{
+	width: 8%;
+	margin: 3px 0;
+	padding: 4px 2px;
+}
+.bttn.pointsBttn{
+	margin: 0;
+	float: right;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	min-width: 1.5em;
+	max-width: 2em;
 }
 #announceControl .bttn {
     width: 18%;
@@ -192,4 +212,7 @@ body {
 	height: auto;
 	background: #aaa;
 	border: 2px solid black;
+}
+.downDistance{
+	font-size: 25px;
 }

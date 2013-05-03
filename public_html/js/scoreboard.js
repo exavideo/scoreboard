@@ -59,8 +59,8 @@ var autocompletePenalties = [
 var clockState = { };
 var lastStopTimeElapsed = 0;
 var overtime_length = 5*60*10;
-var down = 1;
-var togo = 10;
+var down = "1st";
+var ytg = 10;
 
 function getText(sourceurl, callback) {
     jQuery.ajax({
@@ -215,14 +215,18 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#shotOnGoal").click(shotTaken);
 //        $(elem).find("#takeTimeout").click(timeoutTaken);  
         $(elem).find("#possession").click(possessionChange);        
-        $(elem).find("#minorPenalty").click(function() { newPenalty.call(this, 1200); });
-        $(elem).find("#doubleMinorPenalty").click(function() { newPenalty.call(this, 2400); });
-        $(elem).find("#majorPenalty").click(function() { newPenalty.call(this, 3000); });
+        
+		$(elem).find(".penaltyBttn").click(function(){newPenalty.call(this, $(this).attr("value"));});
+
         $(elem).find("#clearPenalties").click(clearPenalties);
         $(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
         $(elem).find("#editPenalties").click(editPenalties);
 		
-        $(elem).find(".statusBttn").click(function(){statusChange(this, $(elem)); });
+        $(elem).find(".statusBttn").click(function(){statusChange(this);});
+		
+		$(elem).find(".bttn.downs, .bttn.nextDown").click(function(){downUpdate(this);});
+		$(elem).find(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
+
 		
         $(elem).find("input,select").blur(function() { $(this).team().putTeamData() });
 
@@ -606,21 +610,70 @@ function shotTaken() {
     );
     $(this).team().putTeamData();
 }
-function statusChange(thiz, team){
+function statusChange(thiz){
+	//Clear all statuses
 	if ($(thiz).attr("status") == "" ){
 		$(thiz).team().find("#status").val("");
-		$(team).find(".statusBttn:checked").attr("checked", false);
+		$(thiz).team().find(".statusBttn:checked").attr("checked", false);
 	}
+	//Put up status of newly checked
 	if ($(thiz).is(":checked")){
 		$(thiz).team().find("#status").val($(thiz).attr("status"));
-		$(thiz).team().find("#status").val().toUpperCase();
-		
+	
+	//on uncheck, look for other checked statuses from both teams
     }else{
         $(thiz).team().find("#status").val("");
 		$(thiz).team().find("#status").val($(thiz).team().find(":checked").attr("status"));
         
     }
 	$(thiz).team().putTeamData();
+}
+
+function downUpdate(thiz){
+	if($(thiz).attr("id") == "nextDown"){
+		if (down == "1st"){down = "2nd";}
+		else if (down == "2nd"){down = "3rd";}
+		else if (down == "3rd"){down = "4th";}
+		else if (down == "4th"){down = "1st"; ytg = 10;}
+	}else{
+		down = $(thiz).attr("value");
+	}
+	$("#homeTeamControl, #awayTeamControl").find("#downNumber").html(down);
+	$("#homeTeamControl, #awayTeamControl").find("#ytgNumber").html(ytg);
+}
+
+function ytgUpdate(thiz){
+	var addSubYTG = 0;
+	addSubYTG = $(thiz).attr("value");
+	
+	if($(thiz).attr("class") == "bttn addSubYTG"){
+		if(ytg == "Goal"){
+			//catches nth & Goal case; no change should be made
+		}else if(ytg == "Inches" && addSubYTG > 0){
+			//catches nth & Inches; only increases value
+			ytg = parseInt(0);
+			ytg += parseInt(addSubYTG);		
+		}else if(ytg + parseInt(addSubYTG) > 0 && ytg + parseInt(addSubYTG) < 90){
+			//values cannot be below 1 and above 89 
+			ytg += parseInt(addSubYTG);
+		}	
+	}else if(addSubYTG == "Goal" || addSubYTG == "Inches"){
+		ytg = addSubYTG;
+	}else{
+		//logic if hardcoded buttons are used
+		ytg = parseInt(addSubYTG);
+	}
+	$("#homeTeamControl, #awayTeamControl").find("#downNumber").html(down);
+	$("#homeTeamControl, #awayTeamControl").find("#ytgNumber").html(ytg);
+
+}
+
+function firstAnd10(){
+	alert("1st and 10 fuck yeah");
+}
+
+function displayDownDistance(){
+	
 }
 
 /*function timeoutTaken() {
@@ -777,12 +830,9 @@ $(document).ready(function() {
         modal: true,
         resizable: false,
     });
-    
-    //$(".baseball, .basketball, .football, .hockey, .soccer, .lacrosse, .broomball, .volleyball").hide();
-	//$(".hockey").show();
-    
+        
     //create function and move when done
-	//toggle settings
+	//TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(function() {
 		$("#gameSettings").toggle("blind", 1000);
 		$("#awayTeamControl").find("#teamSettings").toggle("blind", 1000);
@@ -800,6 +850,7 @@ $(document).ready(function() {
 		}
 	});
 
+	//GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
 	var schoolList = Array();
 	jQuery.getJSON("js/teamlist.json", function(teamlist) {
 		$.each(teamlist.teams, function(k, v) {
@@ -844,7 +895,16 @@ $(document).ready(function() {
 			}
 		});
 	});	
-
+	
+	//GAME TYPE SELECTOR
+	$("#gameType").change(function(){
+		$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
+		var currentSport = $("#gameType :selected").val();
+		$('.' + currentSport).fadeIn();
+		document.title = ('Exaboard - ' + $("#gameType :selected").html());
+	});
+	
+	
     $("#toggleClock").click(toggleClock);
     $("#upSec").click( function() { adjustClock.call(this, 1000); } );
     $("#dnSec").click( function() { adjustClock.call(this, -1000); } );
@@ -859,26 +919,5 @@ $(document).ready(function() {
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
-
-    $("#down1").click( function() { down = 1; updateDD(); } );
-    $("#down2").click( function() { down = 2; updateDD(); } );
-    $("#down3").click( function() { down = 3; updateDD(); } );
-    $("#down4").click( function() { down = 4; updateDD(); } );
-    $("#nextDown").click( function() { if (down < 4) { down += 1; } updateDD(); } );
-    $("#firstAndTen").click( function() { down = 1; togo = 10; updateDD(); } );
-    $("#toGoG").click( function() { togo = -1; updateDD(); } );
-    $("#toGoI").click( function() { togo = 0; updateDD(); } );
-    $("#toGo1").click( function() { togo = 1; updateDD(); } );
-    $("#toGo2").click( function() { togo = 2; updateDD(); } );
-    $("#toGo3").click( function() { togo = 3; updateDD(); } );
-    $("#toGo4").click( function() { togo = 4; updateDD(); } );
-    $("#toGo5").click( function() { togo = 5; updateDD(); } );
-
-    $("#toGoMinus5").click( function() { if (togo > 5) { togo -= 5; } updateDD(); } );
-    $("#toGoPlus5").click( function() { togo += 5; updateDD(); } );
-    $("#toGoEnter").click( customToGo );
-    $("#showDD").click( showDD );
-    $("#clearDD").click( clearDD );
-    $("#flagDD").click( flagDD );
 
 });

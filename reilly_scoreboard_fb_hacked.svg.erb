@@ -88,7 +88,7 @@ width="1440" height="80" x="0" y="0">
         message = "EMPTY NET"
         away_team.flag = true
     end
-
+    message.upcase!
     if home_team.flag or away_team.flag
         ppbg = "#ffff00"
     else

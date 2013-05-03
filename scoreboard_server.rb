@@ -41,9 +41,10 @@ end
 CLOCK_HOCKEY_REGULAR_SEASON = ClockSettings.new(minutes(20), minutes(5), 3)
 CLOCK_HOCKEY_POSTSEASON = ClockSettings.new(minutes(20), minutes(20), 3)
 CLOCK_FOOTBALL = ClockSettings.new(minutes(15), 0, 4)
+CLOCK_LACROSSE = ClockSettings.new(minutes(30), minutes(4), 2)
 
 # FIXME: need a way to change this more easily than manually editing this file
-CLOCK_MODE = CLOCK_HOCKEY_REGULAR_SEASON
+CLOCK_MODE = CLOCK_LACROSSE
 
 class GameClock
     def initialize(preset)

@@ -29,9 +29,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     
     <body>
-	<!-- PRE-GAME SETTINGS PANEL -->
-	<!-- EOF PRE-GAME SETTINGS PANEL -->
-	<!-- SCOREBOARD PANEL -->
+
         <div id="main">
             <!-- global state/control -->
 			
@@ -46,14 +44,18 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
 				<div id="gameSettings" class="innerBox settingsBox" style="display:list-item; list-style:none;">
 					<label class="settingInputs">Sport
-						<select name="gameType" disabled="disabled" ><!--are hard coded now, but will be pulled from json-->
+						<select id="gameType" ><!--are hard coded now, but will be pulled from json with game options-->
+							<option value="baseball">Baseball</option>
 							<option value="basketball">Basketball</option>
 							<option value="broomball">Broomball</option>
-							<option value="fieldhockey">Field Hockey</option>
+							<option value="hockey">Field Hockey</option>
 							<option value="football">Football</option>
-							<option value="hockey" selected="selected">Hockey</option>
+							<option value="hockey">Hockey</option>
+							<option value="rugby">Rugby</option>
 							<option value="soccer">Soccer</option>
+							<option value="baseball">Softball</option>
 							<option value="lacrosse">Lacrosse</option> 
+							<option value="volleyball">Volleyball</option>
 						</select>
 					</label>
 					<label class="settingInputs">Periods
@@ -81,7 +83,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 					<span id="toggleSettingsText">Hide Settings</span>
 				</div>
 				<!-- Clock Control Panel -->
-				<div id="clockControl" class="control basketball broomball football hockey lacrosse soccer volleyball">
+				<div id="clockControl" class="control basketball broomball football hockey lacrosse soccer">
 					<span style="font-size: 36pt; font-weight:bold;" id="clock">31:33.7</span>
 
 					<div style="text-align:right; float: right; padding-right: 70px; padding-left: 0;">
@@ -136,7 +138,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         <div id="preview" class="control">
             <div id="previewDiv"></div>
         </div>
-        </div>
+     
         <div style="display: none" id="teamProto">
 			<div id="teamSettings" class="innerBox settingsBox">
 				<label class="settingInputs">School
@@ -158,59 +160,81 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 					<input type="text" disabled="disabled" id="logo"></input>
 				</label>
 			</div>
-            <div class="innerBox baseball basketball broomball football hockey lacrosse soccer volleyball" id="scoreSet">Score
+            <div class="innerBox baseball basketball broomball football hockey lacrosse rugby soccer volleyball" id="scoreSet">Score
                 <input type="text" id="score" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="plusOne" class="bttn lacrosse soccer hockey ">Goal</div>
-				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="plusOne" class="bttn baseball basketball football volleyball ">+1</div>
-				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"id="plusTwo" class="bttn basketball football">+2</div>
-				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"id="plusThree" class="bttn basketball football">+3</div>
-				<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;"id="plusSix" class="bttn football">+6</div>
+                <div  id="plusOne" class="bttn pointsBttn lacrosse soccer hockey ">Goal</div>
+				<div  id="plusOne" class="bttn pointsBttn baseball basketball football volleyball ">+1</div>
+				<div id="plusTwo" class="bttn pointsBttn basketball football">+2</div>
+				<div id="plusThree" class="bttn pointsBttn basketball football">+3</div>
+				<div id="plusFive" class="bttn pointsBttn rugby">+5</div>
+				<div id="plusSix" class="bttn pointsBttn football">+6</div>
 
                 </div>
 			<div class="innerBox broomball hockey lacrosse soccer" id="sogSet">SOG
                 <input type="text" id="shotsOnGoal" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="sogPlusOne" class="bttn">+1</div>
+                <div  id="sogPlusOne" class="bttn pointsBttn">+1</div>
             </div>
             <div class="innerBox lacrosse" id="gbSet">Ground Balls
                 <input type="text" id="groundBalls" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="gbPlusOne" class="bttn">+1</div>
+                <div  id="gbPlusOne" class="bttn pointsBttn">+1</div>
             </div>
             <div class="innerBox baseball" id="hitsSet">Hits
                 <input type="text" id="hits" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="hitsPlusOne" class="bttn">+1</div>
+                <div  id="hitsPlusOne" class="bttn pointsBttn">+1</div>
             </div>
             <div class="innerBox baseball" id="errorsSet">Errors
                 <input type="text" id="errors" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="errorsPlusOne" class="bttn">+1</div>
+                <div  id="errorsPlusOne" class="bttn pointsBttn">+1</div>
             </div>
             <div class="innerBox basketball" id="foulsSet">Fouls
                 <input type="text" id="fouls" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px; width: 2em;" id="foulsPlusOne" class="bttn">+1</div>
+                <div  id="foulsPlusOne" class="bttn pointsBttn">+1</div>
             </div>
-            <div class="ck-bttn soccer">
+			<div class="ck-bttn lacrosse">
+                <label>
+                    <input type="checkbox" class="statusBttn" id="greenCard" status="Green Card" ><span>Green Card</span>
+
+                    </input>
+                </label>
+            </div>
+            <div class="ck-bttn soccer lacrosse">
                 <label>
                     <input type="checkbox" class="statusBttn" id="yellowCard" status="Yellow Card" ><span>Yellow Card</span>
 
                     </input>
                 </label>
             </div>
-            <div class="ck-bttn soccer">
+            <div class="ck-bttn soccer lacrosse">
                 <label>
                     <input type="checkbox" class="statusBttn" id="redCard_" status="Red Card" ><span>Red Card</span>
 
                     </input>
                 </label>
+			</div>
+            <div class="ck-bttn soccer lacrosse">
+                <label>
+                    <input type="checkbox" class="statusBttn" id="substitution" status="Substitution" ><span>Subsitution</span>
+
+                    </input>
+                </label>
             </div>
-            <div class="ck-bttn lacrosse hockey">
+            <div class="ck-bttn hockey">
                 <label>
                     <input type="checkbox" class="statusBttn" id="emptyNet_" status="Empty Net" ><span>Empty Net</span>
 
                     </input>
                 </label>
             </div>
-            <div class="ck-bttn lacrosse hockey">
+            <div class="ck-bttn hockey">
                 <label>
                     <input type="checkbox" class="statusBttn" id="delayedPenalty_" status="Delayed Penalty"><span>Delayed Penalty</span>
+
+                    </input>
+                </label>
+            </div>
+			<div class="ck-bttn football lacrosse">
+                <label>
+                    <input type="checkbox" class="statusBttn" id="flag" status="Flag"><span>Flag</span>
 
                     </input>
                 </label>
@@ -236,13 +260,80 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                     </input>
                 </label>
             </div>
-            <br/>
+            <div class="innerBox specialFunctionBox football" id="downDistanceBox">
+                <span id="spacer" style="margin: 0 5px;">
+					<span class="downDistance" id="downNumber">1st</span>
+					<span class="downDistance">&amp;</span>
+					<span class="downDistance" id="ytgNumber">10</span>
+				</span>
+				<div class="bttn" id="1st">Display</div>
+				<div class="bttn" id="clearDownDistance" value="">Clear</div>
+				</br>
+				
+				<div class="bttn" id="firstAnd10">1st &amp; 10</div>
+				<div class="bttn nextDown" id="nextDown">Next</div>
+				</br>
+				
+				<div class="bttn downs" id="1down" value="1st">1st</div>
+				<div class="bttn downs" id="2down" value="2nd">2nd</div>
+				<div class="bttn downs" id="3down" value="3rd">3rd</div>
+				<div class="bttn downs" id="4down" value="4th">4th</div>
+				</br>
+				
+				<div class="bttn addSubYTG" id="minus15YTG" value="-15">-15</div>
+				<div class="bttn addSubYTG" id="minus10YTG" value="-10">-10</div>
+				<div class="bttn addSubYTG" id="minus5YTG" value="-5">-5</div>
+				<div class="bttn addSubYTG" id="minus1YTG" value="-1">-1</div>
+				<div class="bttn addSubYTG" id="plus1YTG" value="1">+1</div>
+				<div class="bttn addSubYTG" id="plus5YTG" value="5">+5</div>
+				<div class="bttn addSubYTG" id="plus10YTG" value="10">+10</div>
+				<div class="bttn addSubYTG" id="plus15YTG" value="15">+15</div>
+				<!--</br> CONSIDER DELETING IF PLUS/MINUS INTERFACE WORKS
+				<div class="bttn ytg" id="1YTG" value="1">1</div>
+				<div class="bttn ytg" id="2YTG" value="2">2</div>
+                <div class="bttn ytg" id="3YTG" value="3">3</div>
+                <div class="bttn ytg" id="4YTG" value="4">4</div>
+                <div class="bttn ytg" id="5YTG" value="5">5</div>
+                <div class="bttn ytg" id="6YTG" value="6">6</div>
+                <div class="bttn ytg" id="7YTG" value="7">7</div>
+                <div class="bttn ytg" id="8YTG" value="8">8</div>
+                <div class="bttn ytg" id="9YTG" value="9">9</div>
+                <div class="bttn ytg" id="10YTG" value="10">10</div>
+				</br>
+				
+                <div class="bttn ytg" id="11YTG" value="11">11</div>
+                <div class="bttn ytg" id="12YTG" value="12">12</div>
+                <div class="bttn ytg" id="13YTG" value="13">13</div>
+                <div class="bttn ytg" id="14YTG" value="14">14</div>
+                <div class="bttn ytg" id="15YTG" value="15">15</div>
+                <div class="bttn ytg" id="16YTG" value="16">16</div>
+                <div class="bttn ytg" id="17YTG" value="17">17</div>
+                <div class="bttn ytg" id="18YTG" value="18">18</div>
+                <div class="bttn ytg" id="19YTG" value="19">19</div>
+                <div class="bttn ytg" id="20YTG" value="20">20</div>
+				</br>
+				
+                <div class="bttn ytg" id="25YTG" value="25">25</div>-->
+                <div class="bttn ytgSpecial" id="goalYTG" value="Goal">Goal</div>
+                <div class="bttn ytgSpecial" id="inchesYTG" value="Inches">Inches</div>
+				<span>
+					<label>
+						<input type="text" id="customYTG" value="" maxlength="2" onclick="$(this).select();" style="width:20px; margin:0 5px;">YTG</input>
+					</label>
+				</span>
+
+            </div>
+
             <div class="innerBox specialFunctionBox hockey lacrosse" id="penaltyBox">
-                <div class="bttn" id="minorPenalty">Minor Penalty</div>
-                <div class="bttn" id="majorPenalty">Major Penalty</div>
-                <div class="bttn" id="clearPenalties" onclick="alert('Make a useful confirm alert. this one is pointless')"
-                style="border: 2px solid red;">Clear Penalties</div>
+				<div class="bttn lacrosse penaltyBttn" id="30sPenalty" value="300">0:30 Penalty</div>
+				<div class="bttn lacrosse penaltyBttn" id="60sPenalty" value="600">1:00 Penalty</div>
+				<div class="bttn hockey lacrosse penaltyBttn" id="120sPenalty" value="1200">2:00 Penalty</div>
+                <div class="bttn lacrosse penaltyBttn" id="180sPenalty" value="1800">3:00 Penalty</div>
+				<div class="bttn hockey penaltyBttn" id="240sPenalty" value="2400">4:00 Penalty</div>
+                <div class="bttn hockey penaltyBttn" id="300sPenalty" value="3000">5:00 Penalty</div>
                 <div class="bttn" id="editPenalties">Edit Penalties</div>
+                <div class="bttn hockey lacrosse" id="clearPenalties"
+                style="border: 2px solid red;">Clear Penalties</div>
             </div>
             <!--<button id="lockControl">Lock Controls</button>
             <button id="unlockControl">Unlock Controls</button>-->
@@ -278,10 +369,12 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                                 <td>Time</td>
                                 <td>
                                     <select id="time" name="time">
-                                        <option id="time_1200" value="1200">Minor (2:00)</option>
-                                        <option id="time_2400" value="2400">Double Minor (4:00)</option>
-                                        <option id="time_3000" value="3000">Major (5:00)</option>
-                                        <option id="time_6000" value="6000">Misconduct (10:00)</option>
+										<option class="lacrosse" id="time_300" value="300">0:30</option>
+										<option class="lacrosse" id="time_600" value="600">1:00</option>
+                                        <option class="hockey lacrosse" id="time_1200" value="1200">2:00</option>
+                                        <option class="hockey lacrosse" id="time_2400" value="2400">4:00</option>
+                                        <option class="hockey lacrosse" id="time_3000" value="3000">5:00</option>
+                                        <option class="hockey" id="time_6000" value="6000">10:00</option>
                                     </select>
                                 </td>
                             </tr>
@@ -291,13 +384,9 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                     </li>
                 </ul>
 			</div>
-
             </div>
         </div>
         </div>
-		<div id=test">
-
-		</div>
     </body>
 
 </html>
