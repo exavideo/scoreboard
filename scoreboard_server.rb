@@ -665,6 +665,19 @@ class ScoreboardApp < Patchbay
 
     attr_reader :clock, :autosync_enabled
 
+    def sync_score(hscore, vscore)
+        if hscore == @teams[1]['score'].to_i + 1
+            command_queue << { "goal_scored_by" => "/teams/1" }
+        end
+
+        if vscore == @teams[0]['score'].to_i + 1
+            command_queue << { "goal_scored_by" => "/teams/0" }
+        end
+
+        @teams[1]['score'] = hscore
+        @teams[0]['score'] = vscore
+    end
+
 protected
     def incoming_json
         unless params[:incoming_json]
@@ -970,7 +983,45 @@ def start_drycontact_sync_thread(app)
     end
 end
 
-start_drycontact_sync_thread(app)
+def parse_eversan_digit_string(string, app)
+    if string =~ /(\d{2})(\d{2})(\d)(\d{2})(\d{2})(\d)$/
+        minutes = $1.to_i
+        seconds = $2.to_i
+        tenths = $3.to_i
+        hscore = $4.to_i
+        vscore = $5.to_i
+        period = $6.to_i
+
+	clock_value = minutes * 600 + seconds * 10 + tenths
+        if app.autosync_enabled
+            app.clock.reset_time(clock_value, period)
+            app.sync_score(hscore, vscore)
+        end
+    end
+end
+
+def start_eversan_sync_thread(app)
+    Thread.new do
+        begin
+            sp = SerialPort.new('/dev/ttyACM0', 115200)
+            digit_string = ''
+            digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            loop do
+                ch = sp.read(1)
+                if digits.include?(ch)
+                    digit_string += ch
+                else
+                    parse_eversan_digit_string(digit_string, app)
+                    digit_string = ''
+                end
+            end
+        rescue Exception => e
+            STDERR.puts e.inspect
+        end
+    end
+end
+
+start_eversan_sync_thread(app)
 
 dirty_level = 1
 
