@@ -895,45 +895,82 @@ app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked_ecac.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3002) }
 
-# 2b = run, d4 = stop
+def start_rs232_sync_thread(app)
+    Thread.new do
+        begin
+            sp = SerialPort.new('/dev/ttyUSB0', 19200)
+            string = ''
+            last_control = -1
+            while true
+                byte = sp.read(1)
 
-Thread.new do
-    begin
-        sp = SerialPort.new('/dev/ttyUSB0', 19200)
-        log = File.new('/root/scoreboard_log', 'a')
-        string = ''
-        last_control = -1
-        while true
-            byte = sp.read(1)
+                if byte.ord < 0x10
+                    # parse (string, last_control)
+                    if last_control == 2
+                        tenths = -1
 
-            if byte.ord < 0x10
-                # parse (string, last_control)
-                if last_control == 2
-                    tenths = -1
+                        if (string =~ /^(\d\d)\.(\d)/)
+                            tenths = $1.to_i * 10 + $2.to_i
+                        elsif (string =~ /^(\s\d|\d\d):(\d\d)[^:]/)
+                            tenths = $1.to_i * 600 + $2.to_i * 10
+                        end
 
-                    if (string =~ /^(\d\d)\.(\d)/)
-                        tenths = $1.to_i * 10 + $2.to_i
-                    elsif (string =~ /^(\s\d|\d\d):(\d\d)[^:]/)
-                        tenths = $1.to_i * 600 + $2.to_i * 10
+                        STDERR.puts "tenths: #{tenths}"
+
+                        if tenths >= 0 and app.autosync_enabled
+                            app.clock.reset_period_remaining(tenths)
+                        end
                     end
-
-                    if tenths >= 0 and app.autosync_enabled
-                        app.clock.reset_period_remaining(tenths)
-                    end
+                    last_control = byte.ord
+                    string = ''
+                else
+                    string << byte
                 end
-                timestamp = Time.now.to_s
-
-                log.puts "#{timestamp}: (#{byte.ord}) #{string.inspect}"
-                last_control = byte.ord
-                string = ''
-            else
-                string << byte
             end
+        rescue Exception => e
+            STDERR.puts e.inspect
         end
-    rescue Exception => e
-        STDERR.puts e.inspect
     end
 end
+
+def start_drycontact_sync_thread(app)
+    # The dry contact is connected to CTS and DTR.
+    # CTS is pulled to RTS by a 10k resistor. 
+    # So CTS assumes the state of RTS when the contact
+    # is open, and the state of DTR when the contact
+    # is closed. The switch on a Daktronics AllSport
+    # 5000 console closes when the clock is stopped.
+    # We will set up RTS and DTR so that we get
+    # a logic 1 when the clock is to run and a 0
+    # when it is stopped.
+    Thread.new do
+        sp = SerialPort.new('/dev/ttyS0', 9600)
+        sp.rts = 1
+        sp.dtr = 0
+        last_cts = 1
+
+        while true
+            if sp.cts != last_cts
+                if app.autosync_enabled
+                    if sp.cts == 1
+                        # start the clock
+                        app.clock.start
+                    else
+                        # stop the clock
+                        app.clock.stop
+                    end
+                end
+                # remember what the last state was
+                last_cts = sp.cts
+                # delay briefly to allow signal to debounce
+                sleep 0.1
+            end
+            sleep 0.01
+        end
+    end
+end
+
+start_drycontact_sync_thread(app)
 
 dirty_level = 1
 
