@@ -906,7 +906,7 @@ end
 app = ScoreboardApp.new
 app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked_ecac.svg.erb')
 Thin::Logging.silent = true
-Thread.new { app.run(:Host => '::', :Port => 3002) }
+Thread.new { app.run(:Host => '::1', :Port => 3002) }
 
 def start_rs232_sync_thread(app)
     Thread.new do

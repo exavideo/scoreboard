@@ -143,11 +143,11 @@ function intOrZero(x) {
 function startClock(dummy) {
     // save the time for penalties
     lastStopTimeElapsed = clockState.time_elapsed;
-    putJson('/clock/running', { 'run' : true }); 
+    putJson('clock/running', { 'run' : true }); 
 }
 
 function stopClock(dummy) {
-    putJson('/clock/running', { 'run' : false });
+    putJson('clock/running', { 'run' : false });
 }
 
 function formatTime(tenthsClock) {
@@ -166,7 +166,7 @@ function formatTime(tenthsClock) {
 }
 
 function updateClock( ) {
-    getJson('/clock', function(data) {
+    getJson('clock', function(data) {
         clockState = data;
 
         var tenthsRemaining = data.period_remaining;
@@ -195,7 +195,7 @@ function updateClockTimeout( ) {
 }
 
 function updatePreviewTimeout( ) {
-    $('#preview #previewDiv').load('/preview svg');
+    $('#preview #previewDiv').load('preview svg');
     setTimeout(updatePreviewTimeout, 500);
 }
 
@@ -383,7 +383,7 @@ jQuery.fn.announcePenalty = function( ) {
     var team = this.team( );
 
     var announces = [ team.find('#name').val( ) + ' PENALTY', player, penalty ];
-    postJson('/announce', { messages : announces });
+    postJson('announce', { messages : announces });
 }
 
 jQuery.fn.unserializePenaltiesJson = function(data) {
@@ -681,7 +681,7 @@ function displayDownDistance(){
     if (tol > 0) {
         $(this).team().find("#timeoutsLeft").val(tol - 1);
         $(this).team().putTeamData();
-        putJson('/status', { message : "TIMEOUT " + $(this).team().find("#name").val() });
+        putJson('status', { message : "TIMEOUT " + $(this).team().find("#name").val() });
     }
 }*/
 
@@ -753,19 +753,19 @@ function announceStatusTextInput() {
 }
 
 function postAnnounce() {
-    postJson('/announce', { message : announceStatusTextInput() });     
+    postJson('announce', { message : announceStatusTextInput() });     
 }
 
 function postStatus() {
-    putJson('/status', { message : announceStatusTextInput() });
+    putJson('status', { message : announceStatusTextInput() });
 }
 
 function clearStatus() {
-    putJson('/status', { message : "" });
+    putJson('status', { message : "" });
 }
 
 function viewCommand(cmd) {
-    putJson('/view_command', cmd);
+    putJson('view_command', cmd);
 }
 
 function scoreboardUp() {
@@ -781,31 +781,31 @@ function nextAnnounce() {
 }
 
 function setClock() {
-    putJson('/clock', $("#clockSet").serializeInputsJson());
+    putJson('clock', $("#clockSet").serializeInputsJson());
 }
 
 function toggleClock() {
-	putJson('/clock/toggle', {});
+	putJson('clock/toggle', {});
 }
 
 function adjustClock(time) {
-    putJson('/clock/adjust', { 'time' : time });
+    putJson('clock/adjust', { 'time' : time });
 }
 
 function periodAdvance(dummy) {
-    putJson('/clock/advance', {});
+    putJson('clock/advance', {});
 }
 
 function changeAutosync() {
     if ($("#autoSync").is(':checked')) {
-        putJson('/autosync', { 'enabled' : true });
+        putJson('autosync', { 'enabled' : true });
     } else {
-        putJson('/autosync', { 'enabled' : false });
+        putJson('autosync', { 'enabled' : false });
     }
 }
 
 function getAutosync() {
-    getJson('/autosync', function(data) {
+    getJson('autosync', function(data) {
         if (data.enabled) {
             $("#autoSync").prop('checked',true);
         } else {
@@ -820,9 +820,9 @@ $(document).ready(function() {
 
     $(".teamControl").buildTeamControl();
     // set up team URLs and load initial data
-    $("#awayTeamControl").data('url','/team/0');
+    $("#awayTeamControl").data('url','team/0');
     $("#awayTeamControl").getTeamData();
-    $("#homeTeamControl").data('url','/team/1');
+    $("#homeTeamControl").data('url','team/1');
     $("#homeTeamControl").getTeamData();
 
     $(".dialog").dialog({
@@ -841,9 +841,9 @@ $(document).ready(function() {
 			$("#toggleSettingsText").html("Show Settings");
 			// Reload Team Data
 			
-			$("#awayTeamControl").data('url','/team/0');
+			$("#awayTeamControl").data('url','team/0');
 			$("#awayTeamControl").getTeamData();
-			$("#homeTeamControl").data('url','/team/1');
+			$("#homeTeamControl").data('url','team/1');
 			$("#homeTeamControl").getTeamData();
 		}else{
 			$("#toggleSettingsText").html("Hide Settings");
