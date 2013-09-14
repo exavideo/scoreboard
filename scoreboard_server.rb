@@ -44,7 +44,8 @@ CLOCK_FOOTBALL = ClockSettings.new(minutes(15), 0, 4)
 CLOCK_LACROSSE = ClockSettings.new(minutes(15), minutes(4), 4)
 
 # FIXME: need a way to change this more easily than manually editing this file
-CLOCK_MODE = CLOCK_HOCKEY_REGULAR_SEASON
+#CLOCK_MODE = CLOCK_HOCKEY_REGULAR_SEASON
+CLOCK_MODE = CLOCK_FOOTBALL
 
 class GameClock
     def initialize(preset)
@@ -868,7 +869,7 @@ class ScoreboardView
 end
 
 app = ScoreboardApp.new
-app.view = ScoreboardView.new('reilly_scoreboard.svg.erb')
+app.view = ScoreboardView.new('reilly_scoreboard_fb_hacked.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::', :Port => 3002) }
 
