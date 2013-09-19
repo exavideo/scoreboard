@@ -210,7 +210,7 @@ jQuery.fn.buildTeamControl = function() {
 		$(elem).find(".plusScore").click(function(){addPoints.call(this, $(this).attr("value"))}); 
 
         $(elem).find("#shotOnGoal").click(shotTaken);
-//        $(elem).find("#takeTimeout").click(timeoutTaken);  
+//      $(elem).find("#takeTimeout").click(timeoutTaken);  
         $(elem).find("#possession").click(possessionChange);        
         
 		$(elem).find(".penaltyBttn").click(function(){newPenalty.call(this, $(this).attr("value"));});
@@ -220,10 +220,6 @@ jQuery.fn.buildTeamControl = function() {
         $(elem).find("#editPenalties").click(editPenalties);
 		
         $(elem).find(".statusBttn").click(function(){statusChange(this);});
-		
-		$(elem).find(".bttn.downs, .bttn.nextDown").click(function(){downUpdate(this);});
-		$(elem).find(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
-
 		
         $(elem).find("input,select").blur(function() { $(this).team().putTeamData() });
 
@@ -632,11 +628,14 @@ function downUpdate(thiz){
 		else if (down == "2nd"){down = "3rd";}
 		else if (down == "3rd"){down = "4th";}
 		else if (down == "4th"){down = "1st"; ytg = 10;}
+	}else if($(thiz).attr("id") == "firstAnd10"){
+		down = "1st";
+		ytg = 10;
 	}else{
 		down = $(thiz).attr("value");
 	}
-	$("#homeTeamControl, #awayTeamControl").find("#downNumber").html(down);
-	$("#homeTeamControl, #awayTeamControl").find("#ytgNumber").html(ytg);
+	$("#downNumber").html(down);
+	$("#ytgNumber").html(ytg);
 }
 
 function ytgUpdate(thiz){
@@ -660,17 +659,26 @@ function ytgUpdate(thiz){
 		//logic if hardcoded buttons are used
 		ytg = parseInt(addSubYTG);
 	}
-	$("#homeTeamControl, #awayTeamControl").find("#downNumber").html(down);
-	$("#homeTeamControl, #awayTeamControl").find("#ytgNumber").html(ytg);
+	$("#downNumber").html(down);
+	$("#ytgNumber").html(ytg);
+}
+
+function ytgCustom(thiz){
+	if($(thiz).val() != ""){            //prevents blank ytg
+		ytg = parseInt($(thiz).val());
+	}
+	$("#downNumber").html(down);
+	$("#ytgNumber").html(ytg);
 
 }
 
-function firstAnd10(){
-	alert("1st and 10");
-}
-
-function displayDownDistance(){
-	
+function ddDisplay(thiz){
+	if($(thiz).attr("value") == 1){
+		$("#textInput").val(down +" & "+ytg);
+		postStatus();
+	}else if($(thiz).attr("value") == 0){
+		clearStatus();
+	}
 }
 
 /*function timeoutTaken() {
@@ -759,6 +767,7 @@ function postStatus() {
 
 function clearStatus() {
     putJson('status', { message : "" });
+	$("#textInput").val("");
 }
 
 function viewCommand(cmd) {
@@ -901,7 +910,7 @@ $(document).ready(function() {
 		document.title = ('Exaboard - ' + $("#gameType :selected").html());
 	});
 	
-	//TEMPORARY FOR SANITY PURPOSES
+	//TEMPORARY FOR SANITY PURPOSES sets to football
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
 	$(".football").fadeIn();
 	$("#toggleSettings").trigger("click");
@@ -923,5 +932,10 @@ $(document).ready(function() {
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
+	$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
+	$(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
+	$("#customYTG").change(function(){ytgCustom(this);});
+	$("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
+
 
 });
