@@ -162,12 +162,12 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 			</div>
             <div class="innerBox baseball basketball broomball football hockey lacrosse rugby soccer volleyball" id="scoreSet">Score
                 <input type="text" id="score" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div  id="plusOne" class="bttn pointsBttn lacrosse soccer hockey ">Goal</div>
-				<div  id="plusOne" class="bttn pointsBttn baseball basketball football volleyball ">+1</div>
-				<div id="plusTwo" class="bttn pointsBttn basketball football">+2</div>
-				<div id="plusThree" class="bttn pointsBttn basketball football">+3</div>
-				<div id="plusFive" class="bttn pointsBttn rugby">+5</div>
-				<div id="plusSix" class="bttn pointsBttn football">+6</div>
+                <div class="bttn pointsBttn plusScore lacrosse soccer hockey" value="1">Goal</div>
+				<div class="bttn pointsBttn plusScore baseball basketball football volleyball" value="1">+1</div>
+				<div class="bttn pointsBttn plusScore basketball football" value="2">+2</div>
+				<div class="bttn pointsBttn plusScore basketball football" value="3">+3</div>
+				<div class="bttn pointsBttn plusScore rugby" value="5">+5</div>
+				<div class="bttn pointsBttn plusScore football" value="6" >+6</div>
 
                 </div>
 			<div class="innerBox broomball hockey lacrosse soccer" id="sogSet">SOG
@@ -318,7 +318,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                 <div class="bttn ytgSpecial" id="inchesYTG" value="Inches">Inches</div>
 				<span>
 					<label>
-						<input type="text" id="customYTG" value="" maxlength="2" onclick="$(this).select();" style="width:20px; margin:0 5px;">YTG</input>
+						<input disabled="disabled" type="text" id="customYTG" value="" maxlength="2" onclick="$(this).select();" style="width:20px; margin:0 5px;">YTG</input>
 					</label>
 				</span>
 

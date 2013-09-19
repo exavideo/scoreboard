@@ -206,11 +206,8 @@ jQuery.fn.buildTeamControl = function() {
         // hang onto this because jQuery will move it later
         $(elem).data("penaltyDialog", $(elem).find("#penalty_queue_dialog"));
         $(elem).find("#penalty_queue_dialog").data("team", $(elem));
-
-        $(elem).find("#plusOne").click(function() { addPoints.call(this, 1); });
-        $(elem).find("#plusTwo").click(function() { addPoints.call(this, 2); });
-        $(elem).find("#plusThree").click(function() { addPoints.call(this, 3); });
-        $(elem).find("#plusSix").click(function() { addPoints.call(this, 6); });
+		
+		$(elem).find(".plusScore").click(function(){addPoints.call(this, $(this).attr("value"))}); 
 
         $(elem).find("#shotOnGoal").click(shotTaken);
 //        $(elem).find("#takeTimeout").click(timeoutTaken);  
@@ -597,7 +594,7 @@ function goalScored() {
 // add points to a team's score
 function addPoints(points) {
     $(this).team().find("#score").val(
-        intOrZero($(this).team().find("#score").val()) + points
+        intOrZero($(this).team().find("#score").val()) +  parseInt(points)
     );
     $(this).team().putTeamData();
     // trigger any kind of blinky goal animations (or whatever)
@@ -654,7 +651,7 @@ function ytgUpdate(thiz){
 			ytg = parseInt(0);
 			ytg += parseInt(addSubYTG);		
 		}else if(ytg + parseInt(addSubYTG) > 0 && ytg + parseInt(addSubYTG) < 90){
-			//values cannot be below 1 and above 89 
+			//values cannot be below 1 and above 89 because that's how football works
 			ytg += parseInt(addSubYTG);
 		}	
 	}else if(addSubYTG == "Goal" || addSubYTG == "Inches"){
@@ -669,7 +666,7 @@ function ytgUpdate(thiz){
 }
 
 function firstAnd10(){
-	alert("1st and 10 fuck yeah");
+	alert("1st and 10");
 }
 
 function displayDownDistance(){
@@ -903,6 +900,13 @@ $(document).ready(function() {
 		$('.' + currentSport).fadeIn();
 		document.title = ('Exaboard - ' + $("#gameType :selected").html());
 	});
+	
+	//TEMPORARY FOR SANITY PURPOSES
+	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
+	$(".football").fadeIn();
+	$("#toggleSettings").trigger("click");
+	
+	//END TEMPORARY FOR SANITY PURPOSES
 	
 	
     $("#toggleClock").click(toggleClock);
