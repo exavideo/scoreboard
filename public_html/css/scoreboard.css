@@ -23,7 +23,7 @@
     src: url('GothamNarrow.otf');
 }
 body {
-    background: #aaa url(ExavideoSemitransparent.png) repeat;
+    background: #aaa url(images/ExavideoSemitransparent.png) repeat;
     text-align: center;
     font-family: gothamNarrow;
 	overflow-y: scroll;

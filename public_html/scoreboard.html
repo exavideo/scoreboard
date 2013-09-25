@@ -120,7 +120,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						</span>
 						<div class="bttn" id="displayDownDistance" value="1">Display</div>
 						<div class="bttn" id="clearDownDistance" value="0">Clear</div>
-						</br>
+						<div class="bttn" id="globalFlag" status="Flag" color="yellow" style="border-color:yellow">Flag</div>
+            </br>
 						
 						<div class="bttn firstAnd10" id="firstAnd10">1st &amp; 10</div>
 						<div class="bttn nextDown" id="nextDown">Next</div>
@@ -189,9 +190,14 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         <div id="announceControl" class="control">Announce
             <br />
             <input type="text" id="textInput" />
+        <div id="colorControl" class="control">Colour
+            <br />
+            <input disabled="disabled" type="text" id="textInputColor" />
+
             <br />
             <div id="announce" class="bttn" style="width: 223px;">Announce</div>
             <div id="status" class="bttn" style="width: 223px;">Status</div>
+            
             <div id="nextAnnounce" class="bttn" style="width: 464px;">Next Announce / Clear</div>
         </div>
         <div id="transitionControl" class="control">
@@ -256,21 +262,20 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             </div>
 			<div class="ck-bttn lacrosse">
                 <label>
-                    <input type="checkbox" class="statusBttn" id="greenCard" status="Green Card" ><span>Green Card</span>
+                    <input type="checkbox" class="statusBttn" id="greenCard" status="Green Card" color="green"><span>Green Card</span>
 
                     </input>
                 </label>
             </div>
             <div class="ck-bttn soccer lacrosse">
                 <label>
-                    <input type="checkbox" class="statusBttn" id="yellowCard" status="Yellow Card" ><span>Yellow Card</span>
-
+                    <input type="checkbox" class="statusBttn" id="yellowCard" status="Yellow Card" color="yellow"><span>Yellow Card</span>
                     </input>
                 </label>
             </div>
             <div class="ck-bttn soccer lacrosse">
                 <label>
-                    <input type="checkbox" class="statusBttn" id="redCard_" status="Red Card" ><span>Red Card</span>
+                    <input type="checkbox" class="statusBttn" id="redCard_" status="Red Card" color="red"><span>Red Card</span>
 
                     </input>
                 </label>
@@ -298,7 +303,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             </div>
 			<div class="ck-bttn football lacrosse">
                 <label>
-                    <input type="checkbox" class="statusBttn" id="flag" status="Flag"><span>Flag</span>
+                    <input type="checkbox" class="statusBttn" id="flag" status="Flag"color="yellow"><span>Flag</span>
 
                     </input>
                 </label>
@@ -320,6 +325,11 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
            <div class=""  style="">
                 <label>
                     <input type="text" id="status" value=""><span>Status</span></input>
+                </label>
+            </div>
+                       <div class=""  style="">
+                <label>
+                    <input type="text" id="statusColor" value=""><span>StatusColor</span></input>
                 </label>
             </div>
 			<div class="ck-bttn football">
