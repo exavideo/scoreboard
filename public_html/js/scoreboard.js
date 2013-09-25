@@ -607,16 +607,19 @@ function statusChange(thiz){
 	//Clear all statuses
 	if ($(thiz).attr("status") == "" ){
 		$(thiz).team().find("#status").val("");
+		$(thiz).team().find("#statusColor").val("");
 		$(thiz).team().find(".statusBttn:checked").attr("checked", false);
 	}
 	//Put up status of newly checked
 	if ($(thiz).is(":checked")){
 		$(thiz).team().find("#status").val($(thiz).attr("status"));
+                $(thiz).team().find("#statusColor").val($(thiz).attr("color"));
 	
 	//on uncheck, look for other checked statuses from both teams
-    }else{
+}else{
         $(thiz).team().find("#status").val("");
 		$(thiz).team().find("#status").val($(thiz).team().find(":checked").attr("status"));
+		$(thiz).team().find("#statusColor").val($(thiz).team().find(":checked").attr("color"));
         
     }
 	$(thiz).team().putTeamData();
@@ -757,12 +760,20 @@ function announceStatusTextInput() {
     return $("#announceControl #textInput").val();
 }
 
+function announceStatusColor() {
+    return $("#announceControl #textInputColor").val();
+}
+
 function postAnnounce() {
     postJson('announce', { message : announceStatusTextInput() });     
 }
 
 function postStatus() {
     putJson('status', { message : announceStatusTextInput() });
+}
+
+function postStatusWithColor() {
+    putJson('status', { message : announceStatusTextInput(), color : announceStatusColor() });
 }
 
 function clearStatus() {
@@ -912,7 +923,7 @@ $(document).ready(function() {
 	
 	//TEMPORARY FOR SANITY PURPOSES sets to football
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
-	$(".football").fadeIn();
+	$(".hockey").fadeIn();
 	$("#toggleSettings").trigger("click");
 	
 	//END TEMPORARY FOR SANITY PURPOSES
@@ -937,5 +948,14 @@ $(document).ready(function() {
 	$("#customYTG").change(function(){ytgCustom(this);});
 	$("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
 
+  
+  //Temporary code to get flag working
+  $("#globalFlag").click( function(){
+    $("#textInput").val($(this).attr("status"));
+    $("#textInputColor").val($(this).attr("color"));
+    postStatusWithColor();
+  });
 
+  
+  
 });

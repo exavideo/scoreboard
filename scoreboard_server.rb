@@ -44,7 +44,7 @@ CLOCK_FOOTBALL = ClockSettings.new(minutes(15), 0, 4)
 CLOCK_LACROSSE = ClockSettings.new(minutes(30), minutes(4), 2)
 
 # FIXME: need a way to change this more easily than manually editing this file
-CLOCK_MODE = CLOCK_LACROSSE
+CLOCK_MODE = CLOCK_HOCKEY_REGULAR_SEASON
 
 class GameClock
     def initialize(preset)
@@ -225,6 +225,14 @@ class TeamHelper
 
     def status
         @team_data['status']
+    end
+
+    def status_color
+        if @team_data['statusColor'] && @team_data['statusColor'] != ''
+            @team_data['statusColor']
+        else
+            'yellow'
+        end
     end
 end
 
@@ -494,7 +502,8 @@ class ScoreboardApp < Patchbay
                 'delayedPenalty' => false,
                 'possession' => false,
                 'fontWidth' => 0,
-                'status' => ''
+                'status' => '',
+                'statusColor' => ''
             },
             {
                 'name' => 'RPI',
@@ -515,7 +524,8 @@ class ScoreboardApp < Patchbay
                 'delayedPenalty' => false,
                 'possession' => false,
                 'fontWidth' => 0,
-                'status' => ''
+                'status' => '',
+                'statusColor' => ''
             }
         ]
     end
@@ -626,7 +636,7 @@ class ScoreboardApp < Patchbay
 
     put '/status' do
         @status = incoming_json['message']
-        @status_color = 'white'
+        @status_color = incoming_json['color'] || 'white'
         render :json => ''
     end
 
@@ -1021,7 +1031,7 @@ def start_eversan_sync_thread(app)
     end
 end
 
-start_eversan_sync_thread(app)
+start_rs232_sync_thread(app)
 
 dirty_level = 1
 
